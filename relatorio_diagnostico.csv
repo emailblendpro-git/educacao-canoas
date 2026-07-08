@@ -1,0 +1,10 @@
+Tipo de Problema,Quantidade,Categoria,Criticidade
+Professores em múltiplas turmas,67,Alocação,Alta
+Turmas SEM professor,0,Alocação,Crítica
+Professores afastados/redução,0,Afastamento,Média
+Sobrecarga de períodos,5,Carga Horária,Alta
+Subcarga de períodos,71,Carga Horária,Alta
+Sem STATUS,0,Integridade,Média
+Sem MATRÍCULA,0,Integridade,Baixa
+Sem CARGO_FUNÇÃO,93,Integridade,Média
+Sem DISCIPLINA_PRINCIPAL,86,Integridade,Média

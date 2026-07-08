@@ -1,0 +1,325 @@
+{
+  "timestamp": "2026-07-08T17:58:45.641Z",
+  "resumo": {
+    "total_professores": "123",
+    "total_turmas": "91",
+    "total_alocacoes": "774",
+    "total_lotacoes": "126",
+    "total_escolas": "3"
+  },
+  "integridade": {
+    "com_status_pct": 100,
+    "com_matricula_pct": 100,
+    "com_cargo_pct": 24.4,
+    "com_disciplina_pct": 30.1,
+    "distribuicao_status": [
+      {
+        "status": "ativo",
+        "quantidade": "119"
+      },
+      {
+        "status": "readaptado",
+        "quantidade": "3"
+      },
+      {
+        "status": "reducao_de_carga",
+        "quantidade": "1"
+      }
+    ]
+  },
+  "problemas": {
+    "professores_multiplas_turmas": 67,
+    "turmas_sem_professor": 0,
+    "professores_afastados": 0,
+    "sobrecarga": 5,
+    "subcarga": 71
+  },
+  "escolas": [
+    {
+      "id": 1,
+      "nome": "EMEF Carlos Drummond de Andrade",
+      "total_professores": "50",
+      "total_turmas": "37",
+      "total_alocacoes": "366",
+      "total_lotacoes": "53"
+    },
+    {
+      "id": 3,
+      "nome": "EMEF Paulo VI",
+      "total_professores": "24",
+      "total_turmas": "21",
+      "total_alocacoes": "127",
+      "total_lotacoes": "24"
+    },
+    {
+      "id": 2,
+      "nome": "EMEF Santos Dumont",
+      "total_professores": "49",
+      "total_turmas": "33",
+      "total_alocacoes": "281",
+      "total_lotacoes": "49"
+    }
+  ],
+  "detalhes": {
+    "conflitos": [
+      {
+        "id": 30,
+        "nome": "Vanessa Daga Silveira",
+        "turmas_no_turno": "21",
+        "ids_turmas": "A, B, C, D, E",
+        "turnos": "manha, tarde"
+      },
+      {
+        "id": 87,
+        "nome": "Raquel Rocha Belmini",
+        "turmas_no_turno": "18",
+        "ids_turmas": "A, B, C, D",
+        "turnos": "manha, tarde"
+      },
+      {
+        "id": 90,
+        "nome": "Rosemary Cardozo Brum",
+        "turmas_no_turno": "18",
+        "ids_turmas": "A, B, C, D",
+        "turnos": "manha, tarde"
+      },
+      {
+        "id": 114,
+        "nome": "Janaína da Rosa Fernandes",
+        "turmas_no_turno": "16",
+        "ids_turmas": "A, B",
+        "turnos": "manha, tarde"
+      },
+      {
+        "id": 55,
+        "nome": "Bruna Meurer Lemos",
+        "turmas_no_turno": "13",
+        "ids_turmas": "A, B, C, D",
+        "turnos": "manha, tarde"
+      },
+      {
+        "id": 109,
+        "nome": "Vinícius Antunes da Silva",
+        "turmas_no_turno": "13",
+        "ids_turmas": "A, B",
+        "turnos": "manha, noite, tarde"
+      },
+      {
+        "id": 81,
+        "nome": "Miguel Cerva Melo",
+        "turmas_no_turno": "13",
+        "ids_turmas": "A, B, C, D",
+        "turnos": "manha, tarde"
+      },
+      {
+        "id": 63,
+        "nome": "Eduardo Libio Gasparoni",
+        "turmas_no_turno": "12",
+        "ids_turmas": "A, B, C, D",
+        "turnos": "manha, tarde"
+      },
+      {
+        "id": 31,
+        "nome": "Vanessa Pereira da Silva Azevedo",
+        "turmas_no_turno": "12",
+        "ids_turmas": "A, B, C, D",
+        "turnos": "manha, tarde"
+      },
+      {
+        "id": 95,
+        "nome": "Tiana Silveira Gomes",
+        "turmas_no_turno": "12",
+        "ids_turmas": "A, B, C, D",
+        "turnos": "manha, tarde"
+      }
+    ],
+    "vagas": [],
+    "afastamentos": [],
+    "sobrecarga": [
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 41,
+        "nome": "Anderson Madeira",
+        "carga_horaria_contratual": 40,
+        "total_periodos": "2",
+        "periodos_somados": "44",
+        "status_carga": "SOBRECARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 34,
+        "nome": "Eliane de Fátima de Oliveira Franco",
+        "carga_horaria_contratual": 20,
+        "total_periodos": "3",
+        "periodos_somados": "25",
+        "status_carga": "SOBRECARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 35,
+        "nome": "Jenifer Oliveira Antoni dos Santos",
+        "carga_horaria_contratual": 40,
+        "total_periodos": "3",
+        "periodos_somados": "56",
+        "status_carga": "SOBRECARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 32,
+        "nome": "Vera Lúcia Moraes Ferreira",
+        "carga_horaria_contratual": 40,
+        "total_periodos": "3",
+        "periodos_somados": "56",
+        "status_carga": "SOBRECARGA"
+      },
+      {
+        "escola": "EMEF Paulo VI",
+        "id": 114,
+        "nome": "Janaína da Rosa Fernandes",
+        "carga_horaria_contratual": 20,
+        "total_periodos": "2",
+        "periodos_somados": "26",
+        "status_carga": "SOBRECARGA"
+      }
+    ],
+    "subcarga": [
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 1,
+        "nome": "Alessandra de Souza da Silva",
+        "carga_horaria_contratual": 40,
+        "total_periodos": "3",
+        "periodos_somados": "14",
+        "status_carga": "SUBCARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 46,
+        "nome": "Aline Barbosa de Souza",
+        "carga_horaria_contratual": 20,
+        "total_periodos": "3",
+        "periodos_somados": "14",
+        "status_carga": "SUBCARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 3,
+        "nome": "Aline da Silva Tavares",
+        "carga_horaria_contratual": 40,
+        "total_periodos": "3",
+        "periodos_somados": "19",
+        "status_carga": "SUBCARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 4,
+        "nome": "Aline Veiga Paim Vicari",
+        "carga_horaria_contratual": 40,
+        "total_periodos": "1",
+        "periodos_somados": "24",
+        "status_carga": "SUBCARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 5,
+        "nome": "Ana Carolina Reis Guterres Moreira",
+        "carga_horaria_contratual": 40,
+        "total_periodos": "2",
+        "periodos_somados": "25",
+        "status_carga": "SUBCARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 6,
+        "nome": "Ana Luisa Lucas",
+        "carga_horaria_contratual": 20,
+        "total_periodos": "2",
+        "periodos_somados": "12",
+        "status_carga": "SUBCARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 8,
+        "nome": "Ana Roberta de Oliveira Bueno",
+        "carga_horaria_contratual": 40,
+        "total_periodos": "3",
+        "periodos_somados": "28",
+        "status_carga": "SUBCARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 42,
+        "nome": "Anderson da Silva Hauser",
+        "carga_horaria_contratual": 20,
+        "total_periodos": "1",
+        "periodos_somados": "12",
+        "status_carga": "SUBCARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 9,
+        "nome": "Aneleh Castilhos de Freitas",
+        "carga_horaria_contratual": 40,
+        "total_periodos": "3",
+        "periodos_somados": "28",
+        "status_carga": "SUBCARGA"
+      },
+      {
+        "escola": "EMEF Carlos Drummond de Andrade",
+        "id": 45,
+        "nome": "Camila Figueira de Oliveira",
+        "carga_horaria_contratual": 20,
+        "total_periodos": "3",
+        "periodos_somados": "14",
+        "status_carga": "SUBCARGA"
+      }
+    ],
+    "pendencias": [
+      {
+        "tipo": "grade_nome_nao_identificado",
+        "quantidade": "110",
+        "pendentes": "0"
+      },
+      {
+        "tipo": "vaga",
+        "quantidade": "14",
+        "pendentes": "0"
+      },
+      {
+        "tipo": "cargo_nome_nao_identificado",
+        "quantidade": "7",
+        "pendentes": "0"
+      },
+      {
+        "tipo": "cch_escola_origem_nao_cadastrada",
+        "quantidade": "3",
+        "pendentes": "0"
+      },
+      {
+        "tipo": "eja_turma_duplicada",
+        "quantidade": "2",
+        "pendentes": "0"
+      },
+      {
+        "tipo": "matricula_duplicada",
+        "quantidade": "1",
+        "pendentes": "0"
+      },
+      {
+        "tipo": "ch_invalido",
+        "quantidade": "1",
+        "pendentes": "0"
+      },
+      {
+        "tipo": "aba_ambigua",
+        "quantidade": "1",
+        "pendentes": "0"
+      },
+      {
+        "tipo": "professor_sem_matricula_valida",
+        "quantidade": "1",
+        "pendentes": "0"
+      }
+    ]
+  }
+}

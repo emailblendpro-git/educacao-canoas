@@ -1,0 +1,34 @@
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+async function request(path, options = {}) {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.erro || `Erro ${res.status}`);
+  }
+  return data;
+}
+
+export const api = {
+  login: (login, senha) => request('/auth/login', { method: 'POST', body: JSON.stringify({ login, senha }) }),
+  listarPendencias: () => request('/pendencias'),
+  buscarProfessores: (busca, escolaId) => request(`/professores?busca=${encodeURIComponent(busca || '')}${escolaId ? `&escola_id=${escolaId}` : ''}`),
+  resolverPendencia: (id, payload) => request(`/pendencias/${id}/resolver`, { method: 'PATCH', body: JSON.stringify(payload) }),
+  listarEscolas: () => request('/escolas'),
+  buscarPainel: (escolaId) => request(`/escolas/${escolaId}/painel`),
+  buscarAdministrativo: (escolaId) => request(`/escolas/${escolaId}/administrativo`),
+  buscarAlocacoesProfessor: (id, escolaId) => request(`/professores/${id}/alocacoes?escola_id=${escolaId}`),
+  atribuirDisciplina: (turmaId, disciplinaSigla, professorId) =>
+    request(`/turmas/${turmaId}/alocacoes`, {
+      method: 'PATCH',
+      body: JSON.stringify({ disciplina_sigla: disciplinaSigla, professor_id: professorId }),
+    }),
+};
