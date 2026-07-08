@@ -49,6 +49,22 @@ export default function App() {
     setUsuario(null);
   }
 
+  async function handleExportar() {
+    try {
+      const blob = await api.exportarExcel(escolaId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Painel_${escolaNomeAtual || 'Escola'}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      alert('Erro ao exportar: ' + err.message);
+    }
+  }
+
   if (!usuario) {
     return <Login onLogin={setUsuario} />;
   }
@@ -93,7 +109,14 @@ export default function App() {
 
         {escolaSelecionadaNome && <div className="app-nav-titulo">{escolaSelecionadaNome}</div>}
 
-        <button className="sair" onClick={handleLogout}>Sair</button>
+        <div className="app-nav-direita">
+          {escolaId && (
+            <button className="exportar" onClick={handleExportar} title="Exportar para Excel">
+              📥 Exportar
+            </button>
+          )}
+          <button className="sair" onClick={handleLogout}>Sair</button>
+        </div>
       </nav>
 
       {tela === 'pendencias' && <Pendencias usuario={usuario} filtroTipo={filtroPendencias} onLimparFiltro={() => setFiltroPendencias(null)} />}

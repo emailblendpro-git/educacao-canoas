@@ -31,4 +31,15 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify({ disciplina_sigla: disciplinaSigla, professor_id: professorId }),
     }),
+  exportarExcel: async (escolaId) => {
+    const token = localStorage.getItem('token');
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const res = await fetch(`${apiUrl}/escolas/${escolaId}/exportar`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      }
+    });
+    if (!res.ok) throw new Error('Erro ao exportar');
+    return res.blob();
+  },
 };

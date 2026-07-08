@@ -23,6 +23,29 @@
   text-align: center;
 }
 
+.app-nav-direita {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.exportar {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.exportar:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+
 .app-nav button {
   background: none;
   border: 1px solid var(--border);

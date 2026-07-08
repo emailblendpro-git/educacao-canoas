@@ -8,6 +8,7 @@ const professoresRouter = require('./routes/professores');
 const painelRouter = require('./routes/painel');
 const alocacoesRouter = require('./routes/alocacoes');
 const administrativoRouter = require('./routes/administrativo');
+const exportarRouter = require('./routes/exportar');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ app.use(professoresRouter);
 app.use(painelRouter);
 app.use(alocacoesRouter);
 app.use(administrativoRouter);
+app.use(exportarRouter);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
