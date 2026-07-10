@@ -24,7 +24,7 @@ export const api = {
   resolverPendencia: (id, payload) => request(`/pendencias/${id}/resolver`, { method: 'PATCH', body: JSON.stringify(payload) }),
   listarEscolas: () => request('/escolas'),
   buscarPainel: (escolaId) => request(`/escolas/${escolaId}/painel`),
-  buscarAdministrativo: (escolaId) => request(`/escolas/${escolaId}/administrativo`),
+  buscarGestaoEscolar: (escolaId) => request(`/escolas/${escolaId}/gestao-escolar`),
   buscarAlocacoesProfessor: (id, escolaId) => request(`/professores/${id}/alocacoes?escola_id=${escolaId}`),
   atribuirDisciplina: (turmaId, disciplinaSigla, professorId) =>
     request(`/turmas/${turmaId}/alocacoes`, {
@@ -42,4 +42,10 @@ export const api = {
     if (!res.ok) throw new Error('Erro ao exportar');
     return res.blob();
   },
+  buscarMatrizCurricular: (escolaId) => request(`/escolas/${escolaId}/matriz-curricular`),
+  atualizarMatrizCurricular: (escolaId, anoEscolar, disciplinaId, periodos) =>
+    request(`/escolas/${escolaId}/matriz-curricular/${anoEscolar}/${disciplinaId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ periodos_semana: periodos }),
+    }),
 };

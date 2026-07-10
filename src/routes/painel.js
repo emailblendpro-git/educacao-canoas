@@ -57,14 +57,17 @@ router.get('/escolas/:id/painel', autenticar, async (req, res) => {
        ),
        alocado AS (
          SELECT a.turma_id, d.sigla, SUM(a.periodos) periodos_alocados,
-                array_agg(DISTINCT p.nome) professores, array_agg(DISTINCT p.id) professor_ids
+                array_agg(DISTINCT p.nome) professores, array_agg(DISTINCT p.id) professor_ids,
+                MAX(CASE WHEN cf.id IS NOT NULL THEN 1 ELSE 0 END) tem_administrativo
          FROM alocacoes a
          JOIN disciplinas d ON d.id = a.disciplina_id
          JOIN professores p ON p.id = a.professor_id
+         LEFT JOIN cargos_funcoes cf ON cf.id = p.cargo_funcao_id
          GROUP BY a.turma_id, d.sigla
        )
        SELECT r.turma_id, r.ano_escolar, r.turno, r.identificador, r.sigla, r.obrigatorio,
-              COALESCE(al.periodos_alocados, 0) AS alocado, al.professores, al.professor_ids
+              COALESCE(al.periodos_alocados, 0) AS alocado, al.professores, al.professor_ids,
+              COALESCE(al.tem_administrativo, 0) AS tem_administrativo
        FROM requeridos r
        LEFT JOIN alocado al ON al.turma_id = r.turma_id AND al.sigla = r.sigla
        ORDER BY r.turno, r.ano_escolar, r.identificador, r.sigla`,

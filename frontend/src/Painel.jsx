@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
 import ProfessorPicker from './ProfessorPicker';
+import MatrizCurricular from './MatrizCurricular';
 
 const STATUS_COR = {
   correta: { cor: '#2e7d32', label: 'Carga correta' },
@@ -11,7 +12,8 @@ const STATUS_COR = {
 
 const COR_TAMBEM_ENSINA = '#2f6fed';
 
-function corCelulaGrade(obrigatorio, alocado) {
+function corCelulaGrade(obrigatorio, alocado, temAdministrativo) {
+  if (temAdministrativo) return '#9e9e9e'; // administrada (cinza)
   if (alocado <= 0) return '#e57373'; // vaga total
   if (alocado < obrigatorio) return '#ffca28'; // parcial
   return '#66bb6a'; // completa
@@ -92,9 +94,11 @@ function EditorDisciplina({ editando, escolaId, onFechar, onSalvo }) {
   );
 }
 
-function BlocoGrade({ grade, escolaId, onMudou }) {
+function BlocoGradeTurnos({ grade, escolaId, onMudou }) {
   const porTurno = agruparGrade(grade);
   const [editando, setEditando] = useState(null);
+  const GRADE_ESQUERDA = ['LP', 'ER', 'M', 'C', 'H', 'G'];
+  const GRADE_DIREITA = ['PPA', 'PLL', 'TICs', 'A', 'EF'];
 
   function abrirEditor(t, turno, d) {
     setEditando({
@@ -112,59 +116,164 @@ function BlocoGrade({ grade, escolaId, onMudou }) {
     onMudou();
   }
 
-  function renderizarTurno(turno, turmas) {
+  function renderizarGradeTurno(turno, turmas) {
+    const turmasOrdenadas = Object.values(turmas).sort((a, b) => {
+      const aNum = parseInt(a.ano_escolar) || 0;
+      const bNum = parseInt(b.ano_escolar) || 0;
+      if (aNum !== bNum) return aNum - bNum;
+      return a.identificador.localeCompare(b.identificador);
+    });
+
     return (
-      <div key={turno} className="painel-turno">
-        <h3>{turno}</h3>
-        {Object.entries(turmas).map(([chave, t]) => (
-          <div key={chave}>
-            <div className="painel-turma-linha">
-              <span className="painel-turma-nome">{t.ano_escolar}{t.identificador}</span>
-              <div className="painel-disciplinas">
-                {t.disciplinas.map((d) => (
-                  <button
-                    type="button"
-                    key={d.sigla}
-                    className="painel-disciplina-chip"
-                    style={{ background: corCelulaGrade(d.obrigatorio, Number(d.alocado)) }}
-                    title={`${d.sigla}: ${d.alocado}/${d.obrigatorio} período(s)${d.professores ? ' — ' + d.professores.join(', ') : ' — sem professor'}`}
-                    onClick={() => abrirEditor(t, turno, d)}
-                  >
-                    {d.sigla}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {editando && editando.turmaId === t.turma_id && t.disciplinas.some((d) => d.sigla === editando.sigla) && (
-              <EditorDisciplina
-                editando={editando}
-                escolaId={escolaId}
-                onFechar={() => setEditando(null)}
-                onSalvo={salvo}
-              />
-            )}
-          </div>
-        ))}
+      <div style={{ overflowX: 'auto', border: '2px solid #666', borderRadius: '6px', height: 'fit-content' }}>
+        <table style={{
+          width: '100%',
+          borderCollapse: 'collapse',
+          fontSize: '12px',
+          background: 'white',
+        }}>
+          <thead>
+            <tr style={{ background: '#ccc' }}>
+              <th style={{ padding: '6px 8px', textAlign: 'center', fontWeight: '600', width: '50px', borderRight: '1px solid #999' }}>
+                Turma
+              </th>
+              {GRADE_ESQUERDA.map(s => (
+                <th key={s} style={{ padding: '6px 4px', textAlign: 'center', fontWeight: '600', width: '38px', borderRight: '1px solid #ddd' }}>
+                  {s}
+                </th>
+              ))}
+              <th style={{ width: '8px', background: 'white' }}></th>
+              {GRADE_DIREITA.map(s => (
+                <th key={s} style={{ padding: '6px 4px', textAlign: 'center', fontWeight: '600', width: '38px', borderRight: '1px solid #ddd' }}>
+                  {s}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {turmasOrdenadas.map(t => {
+              const mapDisciplinas = {};
+              t.disciplinas.forEach(d => {
+                mapDisciplinas[d.sigla] = d;
+              });
+
+              return (
+                <tr key={t.turma_id} style={{ borderBottom: '1px solid #ddd' }}>
+                  <td style={{ padding: '4px 8px', textAlign: 'center', fontWeight: '600', background: '#f9f9f9', borderRight: '1px solid #999' }}>
+                    {t.ano_escolar}{t.identificador}
+                  </td>
+                  {GRADE_ESQUERDA.map(s => {
+                    const d = mapDisciplinas[s];
+                    return (
+                      <td key={s} style={{ padding: '4px 2px', textAlign: 'center', borderRight: '1px solid #ddd' }}>
+                        {d ? (
+                          <button
+                            type="button"
+                            onClick={() => abrirEditor(t, turno, d)}
+                            style={{
+                              background: corCelulaGrade(d.obrigatorio, Number(d.alocado), Number(d.tem_administrativo)),
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '3px',
+                              padding: '4px 6px',
+                              fontSize: '11px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              width: '100%',
+                            }}
+                            title={`${d.sigla}: ${d.alocado}/${d.obrigatorio}${d.tem_administrativo ? ' — administrado' : ''}${d.professores ? ' — ' + d.professores.join(', ') : ''}`}
+                          >
+                            {s}
+                          </button>
+                        ) : (
+                          <span style={{ color: '#ddd' }}>-</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td style={{ width: '8px', background: 'white', borderRight: '8px solid white' }}></td>
+                  {GRADE_DIREITA.map(s => {
+                    const d = mapDisciplinas[s];
+                    return (
+                      <td key={s} style={{ padding: '4px 2px', textAlign: 'center', borderRight: '1px solid #ddd' }}>
+                        {d ? (
+                          <button
+                            type="button"
+                            onClick={() => abrirEditor(t, turno, d)}
+                            style={{
+                              background: corCelulaGrade(d.obrigatorio, Number(d.alocado), Number(d.tem_administrativo)),
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '3px',
+                              padding: '4px 6px',
+                              fontSize: '11px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              width: '100%',
+                            }}
+                            title={`${d.sigla}: ${d.alocado}/${d.obrigatorio}${d.tem_administrativo ? ' — administrado' : ''}${d.professores ? ' — ' + d.professores.join(', ') : ''}`}
+                          >
+                            {s}
+                          </button>
+                        ) : (
+                          <span style={{ color: '#ddd' }}>-</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     );
   }
 
-  const turnos = Object.entries(porTurno);
+  // Ordenar turnos: manha, tarde, noite, eja (valores reais gravados no banco)
+  const ordemTurnos = ['manha', 'tarde', 'noite', 'eja'];
+  const turnosOrdenados = ordemTurnos.filter(t => porTurno[t]).map(t => [t, porTurno[t]]);
+  const TURNO_LABEL = { manha: 'MANHÃ', tarde: 'TARDE', noite: 'NOITE', eja: 'EJA' };
 
   return (
-    <div className="painel-bloco">
-      <h2>Grade de aulas</h2>
-      <p className="painel-legenda">
-        <span className="ponto" style={{ background: '#66bb6a' }} /> completa
-        <span className="ponto" style={{ background: '#ffca28' }} /> parcial
-        <span className="ponto" style={{ background: '#e57373' }} /> vaga
-      </p>
-      <p className="dica">Clique numa disciplina pra ver ou trocar quem é o responsável.</p>
+    <div>
+      <div className="painel-bloco">
+        <h2>Grade de aulas</h2>
+        <p className="painel-legenda">
+          <span className="ponto" style={{ background: '#66bb6a' }} /> completa
+          <span className="ponto" style={{ background: '#ffca28' }} /> parcial
+          <span className="ponto" style={{ background: '#e57373' }} /> vaga
+          <span className="ponto" style={{ background: '#9e9e9e' }} /> administrada
+        </p>
+        <p className="dica">Clique numa célula para editar a disciplina.</p>
+      </div>
 
-      {/* Todos os turnos lado a lado (3 colunas) */}
-      {turnos.length > 0 && (
-        <div className="painel-turnos-multiplos">
-          {turnos.map(([turno, turmas]) => renderizarTurno(turno, turmas))}
+      {turnosOrdenados.length > 0 && (
+        <div>
+          {turnosOrdenados.map(([turno, turmas]) => {
+            const anosEscolares = [...new Set(Object.values(turmas).map(t => t.ano_escolar))];
+            return (
+              <div key={turno} style={{ marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>{TURNO_LABEL[turno] || turno}</h3>
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                  <div style={{ flex: '0 0 auto', maxWidth: '500px' }}>
+                    {renderizarGradeTurno(turno, turmas)}
+                  </div>
+                  <div style={{ flex: '0 0 auto', maxWidth: '500px' }}>
+                    <MatrizCurricular escolaId={escolaId} anosEscolares={anosEscolares} />
+                  </div>
+                </div>
+                {editando && Object.values(turmas).some(t => t.turma_id === editando.turmaId) && (
+                  <EditorDisciplina
+                    editando={editando}
+                    escolaId={escolaId}
+                    onFechar={() => setEditando(null)}
+                    onSalvo={salvo}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -297,7 +406,9 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
         onVerPendencias={onVerPendencias}
       />
       {secaoAtiva === 'grade' && (
-        <BlocoGrade grade={painel.grade} escolaId={escolaId} onMudou={carregar} />
+        <div style={{ padding: '20px' }}>
+          <BlocoGradeTurnos grade={painel.grade} escolaId={escolaId} onMudou={carregar} />
+        </div>
       )}
       {secaoAtiva === 'professores' && (
         <BlocoProfessores professores={painel.professores} escolaId={escolaId} />

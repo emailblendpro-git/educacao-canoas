@@ -683,3 +683,27 @@
   font-size: 13px;
   color: #777;
 }
+
+.gestao-categoria {
+  margin-bottom: 32px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.gestao-categoria h3 {
+  margin: -16px -16px 12px -16px;
+  padding: 12px 16px;
+  border-left: 4px solid #ccc;
+  font-size: 16px;
+  color: var(--text-h);
+  background: #f9f9f9;
+}
+
+.gestao-descricao {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 12px 0;
+  font-style: italic;
+}

@@ -5,14 +5,38 @@ const CARGO_CORES = {
   'Diretor': '#c0392b',
   'Vice-Diretor': '#e74c3c',
   'Supervisor': '#3498db',
-  'Orientador': '#2ecc71',
-  'Assessor Pedagógico': '#f39c12',
-  'TEB': '#9b59b6',
-  'Sala de Recursos': '#1abc9c',
+  'Orientação': '#2ecc71',
+  'Secretaria': '#f39c12',
+  'Readaptado': '#9b59b6',
+  'Assessor Pedagógico': '#1abc9c',
+  'Sala de Recursos': '#16a085',
   'Laboratório de Aprendizagem': '#34495e',
-  'Biblioteca': '#16a085',
-  'Readaptado': '#95a5a6',
+  'Biblioteca': '#95a5a6',
+  'TEB': '#8e44ad',
   'Estagiário': '#bdc3c7',
+};
+
+const CATEGORIAS_INFO = {
+  gestores: {
+    titulo: '👑 Gestores Escolares',
+    descricao: 'Nunca são colocados na grade de aulas',
+    cor: '#FF6B6B'
+  },
+  pedagogicos: {
+    titulo: '📚 Profissionais Pedagógicos',
+    descricao: 'Podem ir para sala de aula em caso de necessidade (ficam em CINZA na grade)',
+    cor: '#4ECDC4'
+  },
+  auxiliares: {
+    titulo: '🤝 Auxiliares',
+    descricao: 'Nunca são colocados na grade de aulas',
+    cor: '#95E1D3'
+  },
+  outros: {
+    titulo: '📌 Outros',
+    descricao: 'Profissionais sem categoria definida',
+    cor: '#C0C0C0'
+  }
 };
 
 function ItemAdministrativo({ admin }) {
@@ -35,17 +59,17 @@ function ItemAdministrativo({ admin }) {
   );
 }
 
-export default function Administrativo({ escolaId }) {
+export default function GestaoEscolar({ escolaId }) {
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState('');
 
   useEffect(() => {
     if (!escolaId) return;
     setErro('');
-    api.buscarAdministrativo(escolaId)
+    api.buscarGestaoEscolar(escolaId)
       .then(setDados)
       .catch((err) => {
-        console.error('Erro ao buscar administrativos:', err);
+        console.error('Erro ao buscar gestão escolar:', err);
         setErro(err.message);
       });
   }, [escolaId]);
@@ -54,27 +78,32 @@ export default function Administrativo({ escolaId }) {
   if (erro) return <p className="erro">{erro}</p>;
   if (!dados) return <p>Carregando...</p>;
 
-  const agrupadosCargo = {};
-  dados.administrativos.forEach(admin => {
-    if (!agrupadosCargo[admin.cargo]) {
-      agrupadosCargo[admin.cargo] = [];
-    }
-    agrupadosCargo[admin.cargo].push(admin);
-  });
+  const todasAsCategorias = Object.keys(dados.profissionais || {});
+  const temProfissionais = todasAsCategorias.some(cat => dados.profissionais[cat].length > 0);
 
   return (
     <div>
       <div className="admin-container">
-        <h2>Corpo Administrativo</h2>
-        <div className="admin-lista">
-          {dados.administrativos.length === 0 ? (
-            <p className="dica">Nenhum funcionário administrativo cadastrado.</p>
-          ) : (
-            dados.administrativos.map((admin, i) => (
-              <ItemAdministrativo key={i} admin={admin} />
-            ))
-          )}
-        </div>
+        <h2>Gestão Escolar</h2>
+        {temProfissionais ? (
+          todasAsCategorias.map(categoria => (
+            dados.profissionais[categoria].length > 0 && (
+              <div key={categoria} className="gestao-categoria">
+                <h3 style={{ borderLeftColor: CATEGORIAS_INFO[categoria].cor }}>
+                  {CATEGORIAS_INFO[categoria].titulo}
+                </h3>
+                <p className="gestao-descricao">{CATEGORIAS_INFO[categoria].descricao}</p>
+                <div className="admin-lista">
+                  {dados.profissionais[categoria].map((prof, i) => (
+                    <ItemAdministrativo key={i} admin={prof} />
+                  ))}
+                </div>
+              </div>
+            )
+          ))
+        ) : (
+          <p className="dica">Nenhum profissional de gestão cadastrado.</p>
+        )}
       </div>
     </div>
   );

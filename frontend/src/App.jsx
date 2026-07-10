@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Login from './Login';
 import Pendencias from './Pendencias';
 import Painel from './Painel';
-import Administrativo from './Administrativo';
+import GestaoEscolar from './Administrativo';
 import { api } from './api';
 import './App.css';
 
@@ -89,10 +89,10 @@ export default function App() {
             Painel
           </button>
           <button
-            className={tela === 'administrativo' ? 'nav-ativo' : ''}
-            onClick={() => setTela('administrativo')}
+            className={tela === 'gestao-escolar' ? 'nav-ativo' : ''}
+            onClick={() => setTela('gestao-escolar')}
           >
-            Administrativo
+            Gestão Escolar
           </button>
 
           {vePerfilGlobal && (
@@ -121,7 +121,7 @@ export default function App() {
 
       {tela === 'pendencias' && <Pendencias usuario={usuario} filtroTipo={filtroPendencias} onLimparFiltro={() => setFiltroPendencias(null)} />}
       {tela === 'painel' && <Painel escolaId={escolaId} onVerPendencias={irParaPendencias} onEscolaNomeChange={setEscolaNomeAtual} />}
-      {tela === 'administrativo' && <Administrativo escolaId={escolaId} />}
+      {tela === 'gestao-escolar' && <GestaoEscolar escolaId={escolaId} />}
     </div>
   );
 }
