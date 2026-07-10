@@ -10,6 +10,7 @@ const alocacoesRouter = require('./routes/alocacoes');
 const administrativoRouter = require('./routes/administrativo');
 const exportarRouter = require('./routes/exportar');
 const matrizCurricularRouter = require('./routes/matriz-curricular');
+const ocorrenciasRouter = require('./routes/ocorrencias');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,6 +26,7 @@ app.use(alocacoesRouter);
 app.use(administrativoRouter);
 app.use(exportarRouter);
 app.use(matrizCurricularRouter);
+app.use(ocorrenciasRouter);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

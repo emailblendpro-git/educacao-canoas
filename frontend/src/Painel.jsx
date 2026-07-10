@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from './api';
 import ProfessorPicker from './ProfessorPicker';
 import MatrizCurricular from './MatrizCurricular';
+import OcorrenciasTab from './Ocorrencias';
 
 const STATUS_COR = {
   correta: { cor: '#2e7d32', label: 'Carga correta' },
@@ -339,6 +340,9 @@ function ItemProfessor({ p, escolaId }) {
               </tbody>
             </table>
           )}
+          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #ddd' }}>
+            <OcorrenciasTab professorId={p.id} escolaId={escolaId} />
+          </div>
         </div>
       )}
     </li>
