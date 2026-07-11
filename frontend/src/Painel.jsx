@@ -284,7 +284,18 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou }) {
 function ItemProfessor({ p, escolaId }) {
   const [aberto, setAberto] = useState(false);
   const [alocacoes, setAlocacoes] = useState(null);
+  const [ocorrenciasCount, setOcorrenciasCount] = useState(0);
   const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    // Buscar contagem de ocorrências ao montar
+    fetch(`http://localhost:3000/professores/${p.id}/ocorrencias?escolaId=${escolaId}`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    })
+      .then(r => r.json())
+      .then(data => setOcorrenciasCount(data.length || 0))
+      .catch(() => setOcorrenciasCount(0));
+  }, [p.id, escolaId]);
 
   function alternar() {
     const vaiAbrir = !aberto;
@@ -309,6 +320,11 @@ function ItemProfessor({ p, escolaId }) {
           <span className="ponto" style={{ background: STATUS_COR[p.status].cor }} title={STATUS_COR[p.status].label} />
           {tambemDaAula && (
             <span className="ponto" style={{ background: COR_TAMBEM_ENSINA }} title="Também dá aula" />
+          )}
+          {ocorrenciasCount > 0 && (
+            <span className="ponto" style={{ background: '#F44336', fontSize: '10px', padding: '0 4px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '18px', color: 'white', fontWeight: 'bold', borderRadius: '50%' }} title={`${ocorrenciasCount} ocorrência(s)`}>
+              {ocorrenciasCount}
+            </span>
           )}
         </span>
         <span className="painel-prof-nome">{p.nome}</span>
