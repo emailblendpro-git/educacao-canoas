@@ -315,23 +315,29 @@ function ItemProfessor({ p, escolaId }) {
 
   return (
     <li className="painel-professor-item">
-      <button className="painel-professor-cabecalho" onClick={alternar}>
-        <span className="painel-pontos">
-          <span className="ponto" style={{ background: STATUS_COR[p.status].cor }} title={STATUS_COR[p.status].label} />
-          {tambemDaAula && (
-            <span className="ponto" style={{ background: COR_TAMBEM_ENSINA }} title="Também dá aula" />
-          )}
+      <button className="painel-professor-cabecalho" onClick={alternar} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flex: 1, gap: '8px' }}>
+          <span className="painel-pontos">
+            <span className="ponto" style={{ background: STATUS_COR[p.status].cor }} title={STATUS_COR[p.status].label} />
+            {tambemDaAula && (
+              <span className="ponto" style={{ background: COR_TAMBEM_ENSINA }} title="Também dá aula" />
+            )}
+          </span>
+          <div style={{ flex: 1 }}>
+            <span className="painel-prof-nome">{p.nome}</span>
+            <span className="painel-prof-detalhe">
+              matrícula {p.matricula} — {detalhe}
+            </span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {ocorrenciasCount > 0 && (
-            <span className="ponto" style={{ background: '#F44336', fontSize: '10px', padding: '0 4px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '18px', color: 'white', fontWeight: 'bold', borderRadius: '50%' }} title={`${ocorrenciasCount} ocorrência(s)`}>
+            <span style={{ background: '#F44336', fontSize: '14px', padding: '4px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '28px', height: '28px', color: 'white', fontWeight: 'bold', borderRadius: '50%' }} title={`${ocorrenciasCount} ocorrência(s)`}>
               {ocorrenciasCount}
             </span>
           )}
-        </span>
-        <span className="painel-prof-nome">{p.nome}</span>
-        <span className="painel-prof-detalhe">
-          matrícula {p.matricula} — {detalhe}
-        </span>
-        <span className="painel-professor-seta">{aberto ? '▲' : '▼'}</span>
+          <span className="painel-professor-seta">{aberto ? '▲' : '▼'}</span>
+        </div>
       </button>
 
       {aberto && (
