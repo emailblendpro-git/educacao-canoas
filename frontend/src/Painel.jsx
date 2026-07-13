@@ -36,8 +36,8 @@ function BlocoResumo({ resumo, secaoAtiva, onEscolherSecao, onVerPendencias, obs
     { chave: 'grade', label: 'Turmas', valor: resumo.turmas, onClick: () => onEscolherSecao('grade') },
     { chave: 'professores', label: 'Professores', valor: resumo.professores, onClick: () => onEscolherSecao('professores') },
     { chave: 'pendencias', label: 'Pendências abertas', valor: resumo.pendencias_abertas, onClick: () => onVerPendencias(null) },
-    { chave: 'vagas', label: 'Vagas em aberto', valor: resumo.vagas_abertas, onClick: () => onVerPendencias('vaga') },
     { chave: 'observacoes', label: 'Obs. abertas', valor: observacoesAbertas, onClick: () => null },
+    { chave: 'vagas', label: 'Vagas em aberto', valor: resumo.vagas_abertas, onClick: () => onVerPendencias('vaga') },
   ];
   return (
     <div className="painel-resumo">
@@ -47,7 +47,7 @@ function BlocoResumo({ resumo, secaoAtiva, onEscolherSecao, onVerPendencias, obs
           key={i.label}
           className={`painel-card${secaoAtiva === i.chave ? ' painel-card-ativo' : ''}`}
           onClick={i.onClick}
-          style={i.chave === 'observacoes' && observacoesAbertas > 0 ? { borderColor: '#f44336', borderWidth: '2px' } : {}}
+          style={i.chave === 'observacoes' && observacoesAbertas > 0 ? { borderColor: '#000', borderWidth: '2px' } : {}}
         >
           <span className="painel-card-valor">{i.valor}</span>
           <span className="painel-card-label">{i.label}</span>
