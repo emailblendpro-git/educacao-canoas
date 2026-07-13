@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from './api';
 import ProfessorPicker from './ProfessorPicker';
 import MatrizCurricular from './MatrizCurricular';
-import OcorrenciasTab from './Ocorrencias';
+import ObservacoesTab from './Observacoes';
 
 const STATUS_COR = {
   correta: { cor: '#2e7d32', label: 'Carga correta' },
@@ -284,17 +284,20 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou }) {
 function ItemProfessor({ p, escolaId }) {
   const [aberto, setAberto] = useState(false);
   const [alocacoes, setAlocacoes] = useState(null);
-  const [ocorrenciasCount, setOcorrenciasCount] = useState(0);
+  const [observacoesAbertasCount, setObservacoesAbertasCount] = useState(0);
   const [erro, setErro] = useState('');
 
   useEffect(() => {
-    // Buscar contagem de ocorrências ao montar
-    fetch(`http://localhost:3000/professores/${p.id}/ocorrencias?escolaId=${escolaId}`, {
+    // Buscar contagem de observações abertas ao montar
+    fetch(`http://localhost:3000/professores/${p.id}/observacoes?escolaId=${escolaId}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
     })
       .then(r => r.json())
-      .then(data => setOcorrenciasCount(data.length || 0))
-      .catch(() => setOcorrenciasCount(0));
+      .then(data => {
+        const abertas = (data || []).filter(o => o.status === 'aberta');
+        setObservacoesAbertasCount(abertas.length);
+      })
+      .catch(() => setObservacoesAbertasCount(0));
   }, [p.id, escolaId]);
 
   function alternar() {
@@ -322,6 +325,9 @@ function ItemProfessor({ p, escolaId }) {
             {tambemDaAula && (
               <span className="ponto" style={{ background: COR_TAMBEM_ENSINA }} title="Também dá aula" />
             )}
+            {observacoesAbertasCount > 0 && (
+              <span className="ponto" style={{ background: '#f44336' }} title={`${observacoesAbertasCount} observação(ões) aberta(s)`} />
+            )}
           </span>
           <div style={{ flex: 1 }}>
             <span className="painel-prof-nome">{p.nome}</span>
@@ -331,9 +337,9 @@ function ItemProfessor({ p, escolaId }) {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {ocorrenciasCount > 0 && (
-            <span style={{ background: '#F44336', fontSize: '14px', padding: '4px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '28px', height: '28px', color: 'white', fontWeight: 'bold', borderRadius: '50%' }} title={`${ocorrenciasCount} ocorrência(s)`}>
-              {ocorrenciasCount}
+          {observacoesAbertasCount > 0 && (
+            <span style={{ background: '#f44336', fontSize: '12px', padding: '2px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '24px', height: '24px', color: 'white', fontWeight: 'bold', borderRadius: '4px' }} title={`${observacoesAbertasCount} observação(ões) aberta(s)`}>
+              Obs: {observacoesAbertasCount}
             </span>
           )}
           <span className="painel-professor-seta">{aberto ? '▲' : '▼'}</span>
@@ -362,8 +368,8 @@ function ItemProfessor({ p, escolaId }) {
               </tbody>
             </table>
           )}
-          <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #ddd' }}>
-            <OcorrenciasTab professorId={p.id} escolaId={escolaId} />
+          <div>
+            <ObservacoesTab professorId={p.id} escolaId={escolaId} />
           </div>
         </div>
       )}
