@@ -423,6 +423,8 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
   const [observacoesAbertas, setObservacoesAbertas] = useState(0);
   const [mostrarListaObservacoes, setMostrarListaObservacoes] = useState(false);
   const [listaObservacoes, setListaObservacoes] = useState([]);
+  const [obsEditando, setObsEditando] = useState(null);
+  const [textoEditando, setTextoEditando] = useState('');
 
   function carregar() {
     if (!escolaId) return;
@@ -491,6 +493,42 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
     carregarObservacoes();
   }, [mostrarListaObservacoes, painel, escolaId]);
 
+  // Funções para editar observação
+  const abrirEditarObservacao = (obs) => {
+    setObsEditando(obs);
+    setTextoEditando(obs.texto);
+  };
+
+  const salvarObservacao = async () => {
+    if (!obsEditando) return;
+    try {
+      await api.encerrarObservacao(obsEditando.professorId, obsEditando.id, escolaId);
+      setObsEditando(null);
+      setTextoEditando('');
+      // Recarregar lista
+      setMostrarListaObservacoes(false);
+      setTimeout(() => setMostrarListaObservacoes(true), 100);
+      carregar();
+    } catch (err) {
+      alert('Erro ao salvar: ' + err.message);
+    }
+  };
+
+  const deletarObservacao = async () => {
+    if (!obsEditando || !window.confirm('Tem certeza que quer deletar?')) return;
+    try {
+      await api.deletarObservacao(obsEditando.professorId, obsEditando.id, escolaId);
+      setObsEditando(null);
+      setTextoEditando('');
+      // Recarregar lista
+      setMostrarListaObservacoes(false);
+      setTimeout(() => setMostrarListaObservacoes(true), 100);
+      carregar();
+    } catch (err) {
+      alert('Erro ao deletar: ' + err.message);
+    }
+  };
+
   if (!escolaId) return <p className="dica">Selecione uma escola.</p>;
   if (erro) return <p className="erro">{erro}</p>;
   if (!painel) return <p>Carregando...</p>;
@@ -542,13 +580,25 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
               {listaObservacoes.map((obs, i) => (
                 <div
                   key={`${obs.professorId}-${obs.id}-${i}`}
+                  onClick={() => abrirEditarObservacao(obs)}
                   style={{
                     background: 'white',
                     border: '1px solid #ddd',
                     borderRadius: '6px',
                     padding: '12px',
                     marginBottom: '12px',
-                    fontSize: '13px'
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    ':hover': { background: '#f0f0f0', borderColor: '#999' }
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#f0f0f0';
+                    e.currentTarget.style.borderColor = '#999';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'white';
+                    e.currentTarget.style.borderColor = '#ddd';
                   }}
                 >
                   <div style={{ fontWeight: 'bold', color: '#333', marginBottom: '4px' }}>
@@ -567,6 +617,120 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {obsEditando && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '8px',
+            padding: '24px',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0 }}>Editar Observação</h3>
+              <button
+                onClick={() => { setObsEditando(null); setTextoEditando(''); }}
+                style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
+                Professor
+              </label>
+              <div style={{ color: '#666', fontSize: '14px' }}>
+                {obsEditando.professorNome} (Mat: {obsEditando.professorMatricula})
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
+                Data
+              </label>
+              <div style={{ color: '#666', fontSize: '14px' }}>
+                {obsEditando.data}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
+                Observação
+              </label>
+              <textarea
+                value={textoEditando}
+                onChange={(e) => setTextoEditando(e.target.value)}
+                style={{
+                  width: '100%',
+                  minHeight: '100px',
+                  padding: '8px',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  fontFamily: 'Arial',
+                  fontSize: '14px',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => { setObsEditando(null); setTextoEditando(''); }}
+                style={{
+                  padding: '8px 16px',
+                  border: '1px solid #ddd',
+                  background: '#f5f5f5',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={deletarObservacao}
+                style={{
+                  padding: '8px 16px',
+                  border: 'none',
+                  background: '#f44336',
+                  color: 'white',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Deletar
+              </button>
+              <button
+                onClick={salvarObservacao}
+                style={{
+                  padding: '8px 16px',
+                  border: 'none',
+                  background: '#4CAF50',
+                  color: 'white',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Encerrar
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
