@@ -15,14 +15,9 @@ export default function ObservacoesTab({ professorId, escolaId }) {
 
   async function carregarObservacoes() {
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(
-        `http://localhost:3000/professores/${professorId}/observacoes?escolaId=${escolaId}`,
-        { headers: { 'Authorization': `Bearer ${token}` } }
-      );
-      if (!res.ok) throw new Error('Erro ao buscar observações');
-      const dados = await res.json();
+      const dados = await api.buscarObservacoes(professorId, escolaId);
       setObservacoes(dados || []);
+      setErro('');
     } catch (err) {
       console.error(err);
       setErro(err.message);
@@ -38,19 +33,7 @@ export default function ObservacoesTab({ professorId, escolaId }) {
     setCarregando(true);
     setErro('');
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(
-        `http://localhost:3000/professores/${professorId}/observacoes`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({ data: novaData, texto: novoTexto, escolaId }),
-        }
-      );
-      if (!res.ok) throw new Error('Erro ao adicionar observação');
+      await api.adicionarObservacao(professorId, novaData, novoTexto, escolaId);
       setNovoTexto('');
       setNovaData(new Date().toISOString().split('T')[0]);
       await carregarObservacoes();
@@ -66,15 +49,7 @@ export default function ObservacoesTab({ professorId, escolaId }) {
 
     setCarregando(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(
-        `http://localhost:3000/professores/${professorId}/observacoes/${obsId}/encerrar?escolaId=${escolaId}`,
-        {
-          method: 'PATCH',
-          headers: { 'Authorization': `Bearer ${token}` },
-        }
-      );
-      if (!res.ok) throw new Error('Erro ao encerrar observação');
+      await api.encerrarObservacao(professorId, obsId, escolaId);
       await carregarObservacoes();
     } catch (err) {
       setErro(err.message);
@@ -88,15 +63,7 @@ export default function ObservacoesTab({ professorId, escolaId }) {
 
     setCarregando(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(
-        `http://localhost:3000/professores/${professorId}/observacoes/${obsId}?escolaId=${escolaId}`,
-        {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` },
-        }
-      );
-      if (!res.ok) throw new Error('Erro ao deletar observação');
+      await api.deletarObservacao(professorId, obsId, escolaId);
       await carregarObservacoes();
     } catch (err) {
       setErro(err.message);

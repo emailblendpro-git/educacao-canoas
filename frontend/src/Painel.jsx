@@ -289,10 +289,7 @@ function ItemProfessor({ p, escolaId }) {
 
   useEffect(() => {
     // Buscar contagem de observações abertas ao montar
-    fetch(`http://localhost:3000/professores/${p.id}/observacoes?escolaId=${escolaId}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then(r => r.json())
+    api.buscarObservacoes(p.id, escolaId)
       .then(data => {
         const abertas = (data || []).filter(o => o.status === 'aberta');
         setObservacoesAbertasCount(abertas.length);

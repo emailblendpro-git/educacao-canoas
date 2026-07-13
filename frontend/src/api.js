@@ -48,4 +48,19 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify({ periodos_semana: periodos }),
     }),
+  buscarObservacoes: (professorId, escolaId) =>
+    request(`/professores/${professorId}/observacoes?escolaId=${escolaId}`),
+  adicionarObservacao: (professorId, data, texto, escolaId) =>
+    request(`/professores/${professorId}/observacoes`, {
+      method: 'POST',
+      body: JSON.stringify({ data, texto, escolaId }),
+    }),
+  encerrarObservacao: (professorId, obsId, escolaId) =>
+    request(`/professores/${professorId}/observacoes/${obsId}/encerrar?escolaId=${escolaId}`, {
+      method: 'PATCH',
+    }),
+  deletarObservacao: (professorId, obsId, escolaId) =>
+    request(`/professores/${professorId}/observacoes/${obsId}?escolaId=${escolaId}`, {
+      method: 'DELETE',
+    }),
 };
