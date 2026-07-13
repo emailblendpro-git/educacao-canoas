@@ -31,12 +31,13 @@ function agruparGrade(grade) {
   return porTurno;
 }
 
-function BlocoResumo({ resumo, secaoAtiva, onEscolherSecao, onVerPendencias }) {
+function BlocoResumo({ resumo, secaoAtiva, onEscolherSecao, onVerPendencias, observacoesAbertas }) {
   const itens = [
     { chave: 'grade', label: 'Turmas', valor: resumo.turmas, onClick: () => onEscolherSecao('grade') },
     { chave: 'professores', label: 'Professores', valor: resumo.professores, onClick: () => onEscolherSecao('professores') },
     { chave: 'pendencias', label: 'Pendências abertas', valor: resumo.pendencias_abertas, onClick: () => onVerPendencias(null) },
     { chave: 'vagas', label: 'Vagas em aberto', valor: resumo.vagas_abertas, onClick: () => onVerPendencias('vaga') },
+    { chave: 'observacoes', label: 'Obs. abertas', valor: observacoesAbertas, onClick: () => null },
   ];
   return (
     <div className="painel-resumo">
@@ -46,6 +47,7 @@ function BlocoResumo({ resumo, secaoAtiva, onEscolherSecao, onVerPendencias }) {
           key={i.label}
           className={`painel-card${secaoAtiva === i.chave ? ' painel-card-ativo' : ''}`}
           onClick={i.onClick}
+          style={i.chave === 'observacoes' && observacoesAbertas > 0 ? { borderColor: '#f44336', borderWidth: '2px' } : {}}
         >
           <span className="painel-card-valor">{i.valor}</span>
           <span className="painel-card-label">{i.label}</span>
@@ -316,8 +318,8 @@ function ItemProfessor({ p, escolaId }) {
 
   return (
     <li className="painel-professor-item">
-      <button className="painel-professor-cabecalho" onClick={alternar} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-        <div style={{ display: 'flex', alignItems: 'center', flex: 1, gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '8px' }}>
+        <button className="painel-professor-cabecalho" onClick={alternar} style={{ display: 'flex', alignItems: 'center', flex: 1, gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
           <span className="painel-pontos">
             <span className="ponto" style={{ background: STATUS_COR[p.status].cor }} title={STATUS_COR[p.status].label} />
             {tambemDaAula && (
@@ -333,20 +335,20 @@ function ItemProfessor({ p, escolaId }) {
               matrícula {p.matricula} — {detalhe}
             </span>
           </div>
-        </div>
+        </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {observacoesAbertasCount > 0 && (
             <button
-              onClick={(e) => { e.stopPropagation(); setObservacoesAberto(true); }}
+              onClick={() => setObservacoesAberto(true)}
               style={{ background: '#f44336', fontSize: '12px', padding: '2px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '24px', height: '24px', color: 'white', fontWeight: 'bold', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
               title={`${observacoesAbertasCount} observação(ões) aberta(s). Clique para ver.`}
             >
               Obs: {observacoesAbertasCount}
             </button>
           )}
-          <span className="painel-professor-seta">{aberto ? '▲' : '▼'}</span>
+          <span className="painel-professor-seta" style={{ cursor: 'pointer' }}>{aberto ? '▲' : '▼'}</span>
         </div>
-      </button>
+      </div>
 
       {aberto && (
         <div className="painel-professor-atuacao">
@@ -419,6 +421,7 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
   const [painel, setPainel] = useState(null);
   const [erro, setErro] = useState('');
   const [secaoAtiva, setSecaoAtiva] = useState('grade');
+  const [observacoesAbertas, setObservacoesAbertas] = useState(0);
 
   function carregar() {
     if (!escolaId) return;
@@ -435,9 +438,27 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
 
   useEffect(() => {
     setPainel(null);
+    setObservacoesAbertas(0);
     carregar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [escolaId]);
+
+  // Contar observações abertas de todos os professores
+  useEffect(() => {
+    if (!painel || !painel.professores) return;
+
+    let total = 0;
+    const promises = painel.professores.map(p =>
+      api.buscarObservacoes(p.id, escolaId)
+        .then(data => {
+          const abertas = (data || []).filter(o => o.status === 'aberta');
+          total += abertas.length;
+        })
+        .catch(() => 0)
+    );
+
+    Promise.all(promises).then(() => setObservacoesAbertas(total));
+  }, [painel, escolaId]);
 
   if (!escolaId) return <p className="dica">Selecione uma escola.</p>;
   if (erro) return <p className="erro">{erro}</p>;
@@ -450,6 +471,7 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
         secaoAtiva={secaoAtiva}
         onEscolherSecao={setSecaoAtiva}
         onVerPendencias={onVerPendencias}
+        observacoesAbertas={observacoesAbertas}
       />
       {secaoAtiva === 'grade' && (
         <div style={{ padding: '20px' }}>
