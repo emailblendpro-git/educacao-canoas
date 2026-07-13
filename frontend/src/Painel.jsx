@@ -31,12 +31,12 @@ function agruparGrade(grade) {
   return porTurno;
 }
 
-function BlocoResumo({ resumo, secaoAtiva, onEscolherSecao, onVerPendencias, observacoesAbertas }) {
+function BlocoResumo({ resumo, secaoAtiva, onEscolherSecao, onVerPendencias, observacoesAbertas, onMostrarObservacoes }) {
   const itens = [
     { chave: 'grade', label: 'Turmas', valor: resumo.turmas, onClick: () => onEscolherSecao('grade') },
     { chave: 'professores', label: 'Professores', valor: resumo.professores, onClick: () => onEscolherSecao('professores') },
     { chave: 'pendencias', label: 'Pendências abertas', valor: resumo.pendencias_abertas, onClick: () => onVerPendencias(null) },
-    { chave: 'observacoes', label: 'Obs. abertas', valor: observacoesAbertas, onClick: () => null },
+    { chave: 'observacoes', label: 'Obs. abertas', valor: observacoesAbertas, onClick: () => onMostrarObservacoes() },
     { chave: 'vagas', label: 'Vagas em aberto', valor: resumo.vagas_abertas, onClick: () => onVerPendencias('vaga') },
   ];
   return (
@@ -47,7 +47,6 @@ function BlocoResumo({ resumo, secaoAtiva, onEscolherSecao, onVerPendencias, obs
           key={i.label}
           className={`painel-card${secaoAtiva === i.chave ? ' painel-card-ativo' : ''}`}
           onClick={i.onClick}
-          style={i.chave === 'observacoes' && observacoesAbertas > 0 ? { borderColor: '#000', borderWidth: '2px' } : {}}
         >
           <span className="painel-card-valor">{i.valor}</span>
           <span className="painel-card-label">{i.label}</span>
@@ -422,6 +421,8 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
   const [erro, setErro] = useState('');
   const [secaoAtiva, setSecaoAtiva] = useState('grade');
   const [observacoesAbertas, setObservacoesAbertas] = useState(0);
+  const [mostrarListaObservacoes, setMostrarListaObservacoes] = useState(false);
+  const [listaObservacoes, setListaObservacoes] = useState([]);
 
   function carregar() {
     if (!escolaId) return;
@@ -460,26 +461,113 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
     Promise.all(promises).then(() => setObservacoesAbertas(total));
   }, [painel, escolaId]);
 
+  // Carregar lista de observações abertas quando mostrarListaObservacoes muda
+  useEffect(() => {
+    if (!mostrarListaObservacoes || !painel || !painel.professores) return;
+
+    const carregarObservacoes = async () => {
+      const obs = [];
+      for (const p of painel.professores) {
+        try {
+          const data = await api.buscarObservacoes(p.id, escolaId);
+          const abertas = (data || []).filter(o => o.status === 'aberta');
+          for (const o of abertas) {
+            obs.push({
+              id: o.id,
+              professorId: p.id,
+              professorNome: p.nome,
+              professorMatricula: p.matricula,
+              data: o.data,
+              texto: o.texto,
+              criadoEm: o.criado_em
+            });
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      setListaObservacoes(obs);
+    };
+    carregarObservacoes();
+  }, [mostrarListaObservacoes, painel, escolaId]);
+
   if (!escolaId) return <p className="dica">Selecione uma escola.</p>;
   if (erro) return <p className="erro">{erro}</p>;
   if (!painel) return <p>Carregando...</p>;
 
   return (
-    <div>
-      <BlocoResumo
-        resumo={painel.resumo}
-        secaoAtiva={secaoAtiva}
-        onEscolherSecao={setSecaoAtiva}
-        onVerPendencias={onVerPendencias}
-        observacoesAbertas={observacoesAbertas}
-      />
-      {secaoAtiva === 'grade' && (
-        <div style={{ padding: '20px' }}>
-          <BlocoGradeTurnos grade={painel.grade} escolaId={escolaId} onMudou={carregar} />
+    <div style={{ display: 'flex' }}>
+      <div style={{ flex: 1 }}>
+        <BlocoResumo
+          resumo={painel.resumo}
+          secaoAtiva={secaoAtiva}
+          onEscolherSecao={setSecaoAtiva}
+          onVerPendencias={onVerPendencias}
+          observacoesAbertas={observacoesAbertas}
+          onMostrarObservacoes={() => setMostrarListaObservacoes(!mostrarListaObservacoes)}
+        />
+        {secaoAtiva === 'grade' && (
+          <div style={{ padding: '20px' }}>
+            <BlocoGradeTurnos grade={painel.grade} escolaId={escolaId} onMudou={carregar} />
+          </div>
+        )}
+        {secaoAtiva === 'professores' && (
+          <BlocoProfessores professores={painel.professores} escolaId={escolaId} />
+        )}
+      </div>
+
+      {mostrarListaObservacoes && (
+        <div style={{
+          width: '350px',
+          background: '#f5f5f5',
+          borderLeft: '1px solid #ddd',
+          padding: '20px',
+          overflowY: 'auto',
+          maxHeight: '100vh'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ margin: 0 }}>📝 Observações em aberto</h3>
+            <button
+              onClick={() => setMostrarListaObservacoes(false)}
+              style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}
+            >
+              ×
+            </button>
+          </div>
+
+          {listaObservacoes.length === 0 ? (
+            <p style={{ color: '#999', fontSize: '14px' }}>Nenhuma observação aberta</p>
+          ) : (
+            <div>
+              {listaObservacoes.map((obs, i) => (
+                <div
+                  key={`${obs.professorId}-${obs.id}-${i}`}
+                  style={{
+                    background: 'white',
+                    border: '1px solid #ddd',
+                    borderRadius: '6px',
+                    padding: '12px',
+                    marginBottom: '12px',
+                    fontSize: '13px'
+                  }}
+                >
+                  <div style={{ fontWeight: 'bold', color: '#333', marginBottom: '4px' }}>
+                    {obs.professorNome}
+                  </div>
+                  <div style={{ color: '#666', fontSize: '12px', marginBottom: '6px' }}>
+                    Mat: {obs.professorMatricula}
+                  </div>
+                  <div style={{ color: '#666', fontSize: '12px', marginBottom: '6px' }}>
+                    Data: {obs.data}
+                  </div>
+                  <div style={{ color: '#555', lineHeight: '1.4', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    {obs.texto}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      )}
-      {secaoAtiva === 'professores' && (
-        <BlocoProfessores professores={painel.professores} escolaId={escolaId} />
       )}
     </div>
   );
