@@ -285,6 +285,7 @@ function ItemProfessor({ p, escolaId }) {
   const [aberto, setAberto] = useState(false);
   const [alocacoes, setAlocacoes] = useState(null);
   const [observacoesAbertasCount, setObservacoesAbertasCount] = useState(0);
+  const [observacoesAberto, setObservacoesAberto] = useState(false);
   const [erro, setErro] = useState('');
 
   useEffect(() => {
@@ -335,9 +336,13 @@ function ItemProfessor({ p, escolaId }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {observacoesAbertasCount > 0 && (
-            <span style={{ background: '#f44336', fontSize: '12px', padding: '2px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '24px', height: '24px', color: 'white', fontWeight: 'bold', borderRadius: '4px' }} title={`${observacoesAbertasCount} observação(ões) aberta(s)`}>
+            <button
+              onClick={(e) => { e.stopPropagation(); setObservacoesAberto(true); }}
+              style={{ background: '#f44336', fontSize: '12px', padding: '2px 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '24px', height: '24px', color: 'white', fontWeight: 'bold', borderRadius: '4px', border: 'none', cursor: 'pointer' }}
+              title={`${observacoesAbertasCount} observação(ões) aberta(s). Clique para ver.`}
+            >
               Obs: {observacoesAbertasCount}
-            </span>
+            </button>
           )}
           <span className="painel-professor-seta">{aberto ? '▲' : '▼'}</span>
         </div>
@@ -366,6 +371,18 @@ function ItemProfessor({ p, escolaId }) {
             </table>
           )}
           <div>
+            <ObservacoesTab professorId={p.id} escolaId={escolaId} />
+          </div>
+        </div>
+      )}
+
+      {observacoesAberto && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 1000 }}>
+          <div style={{ background: 'white', width: '100%', maxHeight: '80vh', overflow: 'auto', borderRadius: '12px 12px 0 0', padding: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0 }}>📝 Observações de {p.nome}</h3>
+              <button onClick={() => setObservacoesAberto(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>×</button>
+            </div>
             <ObservacoesTab professorId={p.id} escolaId={escolaId} />
           </div>
         </div>
