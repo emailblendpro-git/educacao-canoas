@@ -6,9 +6,9 @@ const router = express.Router();
 
 // Categorias de profissionais
 const CATEGORIAS = {
-  gestores: ['Diretor', 'Vice-Diretor', 'Supervisor', 'Orientação'],
+  gestores: ['Diretor', 'Vice-Diretor', 'Supervisor', 'Orientador'],
   administrativo: ['Secretaria', 'Readaptação / Auxiliar de secretaria'],
-  pedagogicos: ['Sala de Recursos', 'Assessor Pedagógico', 'TEB', 'Laboratório de Aprendizagem', 'Estagiário', 'Biblioteca', 'Readaptado / Auxiliar biblioteca'],
+  pedagogicos: ['Sala de Recursos', 'Assessor Pedagógico', 'TEB Técnico Ensino Especial', 'Laboratório', 'Estagiário', 'Biblioteca', 'Readaptado / Auxiliar biblioteca'],
 };
 
 function categorizarProfissional(cargo) {
@@ -46,13 +46,13 @@ router.get('/escolas/:id/gestao-escolar', autenticar, async (req, res) => {
            WHEN 'Diretor' THEN 1
            WHEN 'Vice-Diretor' THEN 2
            WHEN 'Supervisor' THEN 3
-           WHEN 'Orientação' THEN 4
+           WHEN 'Orientador' THEN 4
            WHEN 'Secretaria' THEN 5
            WHEN 'Readaptação / Auxiliar de secretaria' THEN 6
            WHEN 'Sala de Recursos' THEN 7
            WHEN 'Assessor Pedagógico' THEN 8
-           WHEN 'TEB' THEN 9
-           WHEN 'Laboratório de Aprendizagem' THEN 10
+           WHEN 'TEB Técnico Ensino Especial' THEN 9
+           WHEN 'Laboratório' THEN 10
            WHEN 'Estagiário' THEN 11
            WHEN 'Biblioteca' THEN 12
            WHEN 'Readaptado / Auxiliar biblioteca' THEN 13
