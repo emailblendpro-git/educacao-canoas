@@ -7,30 +7,31 @@ const CARGO_CORES = {
   'Supervisor': '#3498db',
   'Orientação': '#2ecc71',
   'Secretaria': '#f39c12',
-  'Readaptado': '#9b59b6',
+  'Readaptação / Auxiliar de secretaria': '#e67e22',
   'Assessor Pedagógico': '#1abc9c',
   'Sala de Recursos': '#16a085',
-  'Laboratório de Aprendizagem': '#34495e',
-  'Biblioteca': '#95a5a6',
   'TEB': '#8e44ad',
+  'Laboratório de Aprendizagem': '#34495e',
   'Estagiário': '#bdc3c7',
+  'Biblioteca': '#95a5a6',
+  'Readaptado / Auxiliar biblioteca': '#9b59b6',
 };
 
 const CATEGORIAS_INFO = {
   gestores: {
     titulo: '👑 Gestores Escolares',
-    descricao: 'Nunca são colocados na grade de aulas',
+    descricao: 'Direção, Vice Direção, Supervisão e Orientação — Nunca são colocados na grade de aulas',
     cor: '#FF6B6B'
+  },
+  administrativo: {
+    titulo: '📋 Profissional Administrativo',
+    descricao: 'Secretaria e Readaptação — Nunca são colocados na grade de aulas',
+    cor: '#FFA500'
   },
   pedagogicos: {
     titulo: '📚 Profissionais Pedagógicos',
     descricao: 'Podem ir para sala de aula em caso de necessidade (ficam em CINZA na grade)',
     cor: '#4ECDC4'
-  },
-  auxiliares: {
-    titulo: '🤝 Auxiliares',
-    descricao: 'Nunca são colocados na grade de aulas',
-    cor: '#95E1D3'
   },
   outros: {
     titulo: '📌 Outros',

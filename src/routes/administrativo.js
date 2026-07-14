@@ -6,16 +6,16 @@ const router = express.Router();
 
 // Categorias de profissionais
 const CATEGORIAS = {
-  gestores: ['Diretor', 'Vice-Diretor', 'Supervisor', 'Orientação', 'Secretaria', 'Readaptado'],
-  pedagogicos: ['Assessor Pedagógico', 'Sala de Recursos', 'Laboratório de Aprendizagem', 'Biblioteca'],
-  auxiliares: ['TEB', 'Estagiário'],
+  gestores: ['Diretor', 'Vice-Diretor', 'Supervisor', 'Orientação'],
+  administrativo: ['Secretaria', 'Readaptação / Auxiliar de secretaria'],
+  pedagogicos: ['Sala de Recursos', 'Assessor Pedagógico', 'TEB', 'Laboratório de Aprendizagem', 'Estagiário', 'Biblioteca', 'Readaptado / Auxiliar biblioteca'],
 };
 
 function categorizarProfissional(cargo) {
   if (!cargo) return 'outros';
   if (CATEGORIAS.gestores.some(c => cargo.includes(c))) return 'gestores';
+  if (CATEGORIAS.administrativo.some(c => cargo.includes(c))) return 'administrativo';
   if (CATEGORIAS.pedagogicos.some(c => cargo.includes(c))) return 'pedagogicos';
-  if (CATEGORIAS.auxiliares.some(c => cargo.includes(c))) return 'auxiliares';
   return 'outros';
 }
 
@@ -48,13 +48,14 @@ router.get('/escolas/:id/gestao-escolar', autenticar, async (req, res) => {
            WHEN 'Supervisor' THEN 3
            WHEN 'Orientação' THEN 4
            WHEN 'Secretaria' THEN 5
-           WHEN 'Readaptado' THEN 6
-           WHEN 'Assessor Pedagógico' THEN 7
-           WHEN 'Sala de Recursos' THEN 8
-           WHEN 'Laboratório de Aprendizagem' THEN 9
-           WHEN 'Biblioteca' THEN 10
-           WHEN 'TEB' THEN 11
-           WHEN 'Estagiário' THEN 12
+           WHEN 'Readaptação / Auxiliar de secretaria' THEN 6
+           WHEN 'Sala de Recursos' THEN 7
+           WHEN 'Assessor Pedagógico' THEN 8
+           WHEN 'TEB' THEN 9
+           WHEN 'Laboratório de Aprendizagem' THEN 10
+           WHEN 'Estagiário' THEN 11
+           WHEN 'Biblioteca' THEN 12
+           WHEN 'Readaptado / Auxiliar biblioteca' THEN 13
            ELSE 99
          END,
          p.nome`,
@@ -64,8 +65,8 @@ router.get('/escolas/:id/gestao-escolar', autenticar, async (req, res) => {
     // Agrupar por categoria
     const profissionaisPorCategoria = {
       gestores: [],
+      administrativo: [],
       pedagogicos: [],
-      auxiliares: [],
       outros: []
     };
 
