@@ -15,10 +15,19 @@ const ANOS_6A9 = ['6', '7', '8', '9'];
 function EditarCelula({ valor, onSave, editavel }) {
   const [editando, setEditando] = useState(false);
   const [novoValor, setNovoValor] = useState(valor || 0);
+  const [erro, setErro] = useState('');
 
   function handleSalvar() {
-    onSave(Number(novoValor));
+    const num = Number(novoValor);
+
+    if (editavel && (num < 1 || num > 2)) {
+      setErro('Mínimo 1 e máximo 2 períodos');
+      return;
+    }
+
+    onSave(num);
     setEditando(false);
+    setErro('');
   }
 
   if (!editavel) {
@@ -40,25 +49,43 @@ function EditarCelula({ valor, onSave, editavel }) {
   }
 
   return editando ? (
-    <input
-      type="number"
-      min="0"
-      max="20"
-      value={novoValor}
-      onChange={(e) => setNovoValor(e.target.value)}
-      onBlur={handleSalvar}
-      onKeyDown={(e) => e.key === 'Enter' && handleSalvar()}
-      style={{
-        width: '100%',
-        padding: '4px 6px',
-        border: '1px solid var(--accent)',
-        borderRadius: '3px',
-        textAlign: 'center',
-        fontSize: '12px',
-        fontWeight: '600',
-      }}
-      autoFocus
-    />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <input
+        type="number"
+        min="1"
+        max="2"
+        value={novoValor}
+        onChange={(e) => {
+          setNovoValor(e.target.value);
+          setErro('');
+        }}
+        onBlur={handleSalvar}
+        onKeyDown={(e) => e.key === 'Enter' && handleSalvar()}
+        style={{
+          width: '100%',
+          padding: '4px 6px',
+          border: erro ? '2px solid #c0392b' : '1px solid var(--accent)',
+          borderRadius: '3px',
+          textAlign: 'center',
+          fontSize: '12px',
+          fontWeight: '600',
+          backgroundColor: erro ? '#ffebee' : 'white',
+        }}
+        autoFocus
+        title="Digite 1 ou 2"
+      />
+      {erro && (
+        <span style={{
+          fontSize: '10px',
+          color: '#c0392b',
+          textAlign: 'center',
+          fontWeight: '600',
+          whiteSpace: 'nowrap'
+        }}>
+          {erro}
+        </span>
+      )}
+    </div>
   ) : (
     <span
       onClick={() => setEditando(true)}
@@ -70,7 +97,7 @@ function EditarCelula({ valor, onSave, editavel }) {
         textAlign: 'center',
         fontSize: '12px',
       }}
-      title={`${valor || 0} períodos/semana`}
+      title={`${valor || 0} períodos/semana (clique para editar)`}
     >
       {valor || 0}
     </span>
