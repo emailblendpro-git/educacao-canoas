@@ -284,8 +284,8 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou }) {
 
 function extrairPEB(areaConcurso) {
   if (!areaConcurso) return '';
-  if (areaConcurso.includes('PEB I')) return 'PEB I';
   if (areaConcurso.includes('PEB II')) return 'PEB II';
+  if (areaConcurso.includes('PEB I')) return 'PEB I';
   return '';
 }
 
