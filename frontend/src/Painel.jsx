@@ -282,6 +282,13 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou }) {
   );
 }
 
+function extrairPEB(areaConcurso) {
+  if (!areaConcurso) return '';
+  if (areaConcurso.includes('PEB I')) return 'PEB I';
+  if (areaConcurso.includes('PEB II')) return 'PEB II';
+  return '';
+}
+
 function ItemProfessor({ p, escolaId }) {
   const [aberto, setAberto] = useState(false);
   const [alocacoes, setAlocacoes] = useState(null);
@@ -331,7 +338,12 @@ function ItemProfessor({ p, escolaId }) {
           <div style={{ flex: 1 }}>
             <span className="painel-prof-nome">{p.nome}</span>
             <span className="painel-prof-detalhe">
-              matrícula {p.matricula} — {detalhe}
+              {(() => {
+                const peb = extrairPEB(p.area_concurso);
+                // Se tem cargo, o detalhe já inclui ele, então não adicionar de novo
+                const posicao = !p.cargo && peb ? ` — ${peb}` : '';
+                return ` — matrícula ${p.matricula}${posicao} — ${detalhe}`;
+              })()}
             </span>
           </div>
         </button>
