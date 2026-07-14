@@ -25,9 +25,10 @@ router.get('/professores', autenticar, async (req, res) => {
     }
 
     const result = await pool.query(
-      `SELECT DISTINCT p.id, p.nome, p.matricula
+      `SELECT DISTINCT p.id, p.nome, p.matricula, p.area_concurso, cf.nome as cargo
        FROM professores p
        JOIN lotacoes l ON l.professor_id = p.id
+       LEFT JOIN cargos_funcoes cf ON cf.id = p.cargo_funcao_id
        WHERE l.escola_id = $1 ${filtroBusca}
        ORDER BY p.nome
        LIMIT 20`,

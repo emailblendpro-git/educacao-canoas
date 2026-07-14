@@ -37,9 +37,19 @@ export default function ProfessorPicker({ onSelect, escolaId }) {
     buscar(valor);
   }
 
+  function extrairPEB(areaConcurso) {
+    if (!areaConcurso) return '';
+    if (areaConcurso.includes('PEB I')) return 'PEB I';
+    if (areaConcurso.includes('PEB II')) return 'PEB II';
+    return '';
+  }
+
   function escolher(prof) {
     setSelecionado(prof);
-    setBusca(`${prof.nome} (matrícula ${prof.matricula})`);
+    const peb = extrairPEB(prof.area_concurso);
+    const cargo = prof.cargo ? ` — ${prof.cargo}` : '';
+    const pebInfo = peb && !prof.cargo ? ` — ${peb}` : '';
+    setBusca(`${prof.nome} — matrícula ${prof.matricula}${cargo}${pebInfo}`);
     setOpcoes([]);
     setAbriu(false);
     onSelect(prof.id);
@@ -57,11 +67,16 @@ export default function ProfessorPicker({ onSelect, escolaId }) {
       {erro && <p className="erro">{erro}</p>}
       {abriu && opcoes.length > 0 && (
         <ul className="opcoes">
-          {opcoes.map((p) => (
-            <li key={p.id} onClick={() => escolher(p)}>
-              {p.nome} <span className="matricula">matrícula {p.matricula}</span>
-            </li>
-          ))}
+          {opcoes.map((p) => {
+            const peb = extrairPEB(p.area_concurso);
+            const cargo = p.cargo ? ` — ${p.cargo}` : '';
+            const pebInfo = peb && !p.cargo ? ` — ${peb}` : '';
+            return (
+              <li key={p.id} onClick={() => escolher(p)}>
+                {p.nome} <span className="matricula">matrícula {p.matricula}{cargo}{pebInfo}</span>
+              </li>
+            );
+          })}
         </ul>
       )}
       {abriu && !buscando && !erro && opcoes.length === 0 && !selecionado && (
