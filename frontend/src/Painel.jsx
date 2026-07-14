@@ -357,7 +357,7 @@ function ItemProfessor({ p, escolaId }) {
               Obs: {observacoesAbertasCount}
             </button>
           )}
-          <span className="painel-professor-seta" style={{ cursor: 'pointer' }}>{aberto ? '▲' : '▼'}</span>
+          <span className="painel-professor-seta" style={{ cursor: 'pointer' }} onClick={alternar}>{aberto ? '▲' : '▼'}</span>
         </div>
       </div>
 
