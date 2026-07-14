@@ -78,6 +78,20 @@ function EditarCelula({ valor, onSave, editavel }) {
 }
 
 function TabelaMatriz({ anos, disciplinas, disciplinasDireita, matrizPorAno, onAtualizar }) {
+  function calcularTotal(ano, mapDisciplinas) {
+    const allDisciplinas = [...disciplinas, ...(disciplinasDireita || [])];
+    return allDisciplinas.reduce((sum, sigla) => {
+      const d = mapDisciplinas[sigla];
+      return sum + (d?.periodos_semana || 0);
+    }, 0);
+  }
+
+  function getCorTotal(total) {
+    if (total < 20) return '#f2b200'; // amarelo
+    if (total === 20) return '#000000'; // preto
+    return '#c0392b'; // vermelho
+  }
+
   return (
     <div style={{ overflowX: 'auto', border: '2px solid #666', borderRadius: '6px', height: 'fit-content' }}>
       <table style={{
@@ -106,6 +120,9 @@ function TabelaMatriz({ anos, disciplinas, disciplinasDireita, matrizPorAno, onA
                 ))}
               </>
             )}
+            <th style={{ padding: '6px 8px', textAlign: 'center', fontWeight: '600', width: '50px', borderLeft: '1px solid #999' }}>
+              Total
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -115,6 +132,8 @@ function TabelaMatriz({ anos, disciplinas, disciplinasDireita, matrizPorAno, onA
             lista.forEach(d => {
               mapDisciplinas[d.sigla] = d;
             });
+            const total = calcularTotal(ano, mapDisciplinas);
+            const corTotal = getCorTotal(total);
 
             return (
               <tr key={ano} style={{ borderBottom: '1px solid #ddd' }}>
@@ -160,6 +179,17 @@ function TabelaMatriz({ anos, disciplinas, disciplinasDireita, matrizPorAno, onA
                     })}
                   </>
                 )}
+                <td style={{
+                  padding: '4px 8px',
+                  textAlign: 'center',
+                  fontWeight: '600',
+                  background: '#f9f9f9',
+                  borderLeft: '1px solid #999',
+                  color: corTotal,
+                  fontSize: '13px'
+                }}>
+                  {total}
+                </td>
               </tr>
             );
           })}
