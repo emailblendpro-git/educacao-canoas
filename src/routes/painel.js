@@ -75,7 +75,8 @@ router.get('/escolas/:id/painel', autenticar, async (req, res) => {
     );
 
     const profRes = await pool.query(
-      `SELECT p.id, p.nome, p.matricula, p.carga_horaria_contratual AS ch, cf.nome AS cargo, p.area_concurso,
+      `SELECT p.id, p.nome, p.matricula, p.carga_horaria_contratual AS ch, cf.nome AS cargo, p.area_concurso, p.status,
+              MAX(CASE WHEN l.tipo = 'desdobro' THEN 1 ELSE 0 END) AS tem_desdobro,
               COALESCE((
                 SELECT SUM(a.periodos) FROM alocacoes a
                 JOIN turmas t ON t.id = a.turma_id
@@ -84,7 +85,7 @@ router.get('/escolas/:id/painel', autenticar, async (req, res) => {
        FROM professores p
        JOIN lotacoes l ON l.professor_id = p.id AND l.escola_id = $1
        LEFT JOIN cargos_funcoes cf ON cf.id = p.cargo_funcao_id
-       GROUP BY p.id, cf.nome, p.area_concurso
+       GROUP BY p.id, cf.nome, p.area_concurso, p.status
        ORDER BY p.nome`,
       [escolaId]
     );
@@ -99,6 +100,8 @@ router.get('/escolas/:id/painel', autenticar, async (req, res) => {
         ch,
         cargo: p.cargo,
         area_concurso: p.area_concurso,
+        status_professor: p.status,
+        tem_desdobro: !!p.tem_desdobro,
         periodos_esperados: PERIODOS_ESPERADOS_POR_CH[ch] ?? null,
         periodos_alocados: periodosAlocados,
         status: statusCarga(ch, periodosAlocados, !!p.cargo),

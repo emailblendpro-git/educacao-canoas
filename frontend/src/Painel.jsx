@@ -336,7 +336,11 @@ function ItemProfessor({ p, escolaId }) {
             )}
           </span>
           <div style={{ flex: 1 }}>
-            <span className="painel-prof-nome">{p.nome}</span>
+            <span className="painel-prof-nome">
+              {p.nome}
+              {p.tem_desdobro && <span style={{ marginLeft: '8px', fontSize: '11px', background: '#ff9800', color: 'white', padding: '2px 6px', borderRadius: '3px', fontWeight: 'bold' }}>Desdobro</span>}
+              {p.status_professor === 'readaptado' && <span style={{ marginLeft: '8px', fontSize: '11px', background: '#2196f3', color: 'white', padding: '2px 6px', borderRadius: '3px', fontWeight: 'bold' }}>Readaptação</span>}
+            </span>
             <span className="painel-prof-detalhe">
               {(() => {
                 const peb = extrairPEB(p.area_concurso);
