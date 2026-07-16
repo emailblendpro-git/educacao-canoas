@@ -85,4 +85,39 @@ router.get('/escolas/:id/gestao-escolar', autenticar, async (req, res) => {
   }
 });
 
+// Listar usuários/acessos por escola
+router.get('/escolas/:id/acessos', autenticar, async (req, res) => {
+  const escolaId = Number(req.params.id);
+
+  // Apenas admin pode ver todos; diretor vê apenas sua escola
+  if (!PERFIS_GLOBAIS.has(req.usuario.perfil) && escolaId !== req.usuario.escolaId) {
+    return res.status(403).json({ erro: 'Essa escola não é a sua' });
+  }
+
+  try {
+    const result = await req.usuario.perfil === 'admin'
+      ? await pool.query(
+          `SELECT u.id, u.nome, u.login, u.perfil, u.ativo, u.criado_em, e.nome as escola_nome
+           FROM usuarios u
+           LEFT JOIN escolas e ON e.id = u.escola_id
+           WHERE u.escola_id = $1 OR (u.perfil = 'secretaria_central' AND $1::int IS NOT NULL)
+           ORDER BY u.perfil, u.nome`,
+          [escolaId]
+        )
+      : await pool.query(
+          `SELECT u.id, u.nome, u.login, u.perfil, u.ativo, u.criado_em, e.nome as escola_nome
+           FROM usuarios u
+           LEFT JOIN escolas e ON e.id = u.escola_id
+           WHERE u.escola_id = $1
+           ORDER BY u.perfil, u.nome`,
+          [escolaId]
+        );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao buscar acessos' });
+  }
+});
+
 module.exports = router;

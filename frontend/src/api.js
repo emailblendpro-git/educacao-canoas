@@ -63,4 +63,5 @@ export const api = {
     request(`/professores/${professorId}/observacoes/${obsId}?escolaId=${escolaId}`, {
       method: 'DELETE',
     }),
+  buscarAcessos: (escolaId) => request(`/escolas/${escolaId}/acessos`),
 };

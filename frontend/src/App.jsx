@@ -3,6 +3,7 @@ import Login from './Login';
 import Pendencias from './Pendencias';
 import Painel from './Painel';
 import GestaoEscolar from './Administrativo';
+import Acessos from './Acessos';
 import { api } from './api';
 import './App.css';
 
@@ -96,6 +97,15 @@ export default function App() {
           </button>
 
           {vePerfilGlobal && (
+            <button
+              className={tela === 'acessos' ? 'nav-ativo' : ''}
+              onClick={() => setTela('acessos')}
+            >
+              Acessos
+            </button>
+          )}
+
+          {vePerfilGlobal && (
             <select
               value={escolaSelecionada || ''}
               onChange={(e) => setEscolaSelecionada(Number(e.target.value))}
@@ -122,6 +132,7 @@ export default function App() {
       {tela === 'pendencias' && <Pendencias usuario={usuario} filtroTipo={filtroPendencias} onLimparFiltro={() => setFiltroPendencias(null)} />}
       {tela === 'painel' && <Painel escolaId={escolaId} onVerPendencias={irParaPendencias} onEscolaNomeChange={setEscolaNomeAtual} />}
       {tela === 'gestao-escolar' && <GestaoEscolar escolaId={escolaId} />}
+      {tela === 'acessos' && <Acessos escolaId={escolaId} />}
     </div>
   );
 }
