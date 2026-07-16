@@ -1,8 +1,19 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const pool = require('../db');
 const { autenticar, PERFIS_GLOBAIS } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Função para gerar senha aleatória
+function gerarSenhaAleatoria(tamanho = 12) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
+  let senha = '';
+  for (let i = 0; i < tamanho; i++) {
+    senha += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return senha;
+}
 
 // Categorias de profissionais
 const CATEGORIAS = {
@@ -117,6 +128,41 @@ router.get('/escolas/:id/acessos', autenticar, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: 'Erro ao buscar acessos' });
+  }
+});
+
+// Resetar senha de um usuário
+router.patch('/usuarios/:id/resetar-senha', autenticar, async (req, res) => {
+  // Apenas admin pode resetar senha
+  if (!PERFIS_GLOBAIS.has(req.usuario.perfil)) {
+    return res.status(403).json({ erro: 'Apenas administrador pode resetar senhas' });
+  }
+
+  const usuarioId = Number(req.params.id);
+
+  try {
+    // Gerar nova senha
+    const novaSenha = gerarSenhaAleatoria();
+    const senhaHash = await bcrypt.hash(novaSenha, 10);
+
+    // Atualizar no banco
+    const result = await pool.query(
+      'UPDATE usuarios SET senha_hash = $1 WHERE id = $2 RETURNING id, nome, login',
+      [senhaHash, usuarioId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ erro: 'Usuário não encontrado' });
+    }
+
+    res.json({
+      usuario: result.rows[0],
+      senha_temporaria: novaSenha,
+      mensagem: 'Senha resetada com sucesso. Compartilhe a senha temporária com o usuário.'
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao resetar senha' });
   }
 });
 

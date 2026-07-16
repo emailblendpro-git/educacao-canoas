@@ -64,4 +64,6 @@ export const api = {
       method: 'DELETE',
     }),
   buscarAcessos: (escolaId) => request(`/escolas/${escolaId}/acessos`),
+  resetarSenha: (usuarioId) =>
+    request(`/usuarios/${usuarioId}/resetar-senha`, { method: 'PATCH' }),
 };
