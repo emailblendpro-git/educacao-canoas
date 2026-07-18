@@ -9,6 +9,7 @@
     "dev:all": "concurrently \"npm run dev\" \"cd frontend && npm run dev\""
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^16.4.5",
