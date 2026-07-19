@@ -46,13 +46,13 @@ router.get('/escolas/:id/exportar', autenticar, async (req, res) => {
     const abaPainel = workbook.addWorksheet('Painel');
 
     // Cabeçalho
-    abaPainel.merge('A1:F1');
+    abaPainel.mergeCells('A1:F1');
     const header = abaPainel.getCell('A1');
     header.value = escolaNome;
     formatarCelula(header, { font: { bold: true, size: 14 }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CORES.cabecalho } }, alignment: { horizontal: 'center' } });
     header.font.color = { argb: 'FFFFFFFF' };
 
-    abaPainel.merge('A2:F2');
+    abaPainel.mergeCells('A2:F2');
     const subheader = abaPainel.getCell('A2');
     subheader.value = 'PAINEL DE AULAS';
     formatarCelula(subheader, { font: { bold: true, size: 12 }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CORES.titulo } }, alignment: { horizontal: 'center' } });
@@ -88,7 +88,7 @@ router.get('/escolas/:id/exportar', autenticar, async (req, res) => {
     // Professores e Carga Horária
     abaPainel.getCell('A9').value = 'PROFESSORES E CARGA HORÁRIA';
     formatarCelula(abaPainel.getCell('A9'), { font: { bold: true }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CORES.subtitulo } } });
-    abaPainel.merge('A9:F9');
+    abaPainel.mergeCells('A9:F9');
 
     const colunas = ['Nome', 'Matrícula', 'Cargo', 'CH Contratual', 'CH Alocada', 'Status'];
     colunas.forEach((col, i) => {
@@ -144,13 +144,13 @@ router.get('/escolas/:id/exportar', autenticar, async (req, res) => {
     // ===== ABA 2: ADMINISTRATIVO =====
     const abaAdmin = workbook.addWorksheet('Administrativo');
 
-    abaAdmin.merge('A1:C1');
+    abaAdmin.mergeCells('A1:C1');
     const headerAdmin = abaAdmin.getCell('A1');
     headerAdmin.value = escolaNome;
     formatarCelula(headerAdmin, { font: { bold: true, size: 14 }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CORES.cabecalho } }, alignment: { horizontal: 'center' } });
     headerAdmin.font.color = { argb: 'FFFFFFFF' };
 
-    abaAdmin.merge('A2:C2');
+    abaAdmin.mergeCells('A2:C2');
     const subheaderAdmin = abaAdmin.getCell('A2');
     subheaderAdmin.value = 'CORPO ADMINISTRATIVO';
     formatarCelula(subheaderAdmin, { font: { bold: true, size: 12 }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CORES.titulo } }, alignment: { horizontal: 'center' } });
@@ -201,13 +201,13 @@ router.get('/escolas/:id/exportar', autenticar, async (req, res) => {
     // ===== ABA 3: PENDÊNCIAS =====
     const abaPend = workbook.addWorksheet('Pendências');
 
-    abaPend.merge('A1:B1');
+    abaPend.mergeCells('A1:B1');
     const headerPend = abaPend.getCell('A1');
     headerPend.value = escolaNome;
     formatarCelula(headerPend, { font: { bold: true, size: 14 }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CORES.cabecalho } }, alignment: { horizontal: 'center' } });
     headerPend.font.color = { argb: 'FFFFFFFF' };
 
-    abaPend.merge('A2:B2');
+    abaPend.mergeCells('A2:B2');
     const subheaderPend = abaPend.getCell('A2');
     subheaderPend.value = 'PENDÊNCIAS';
     formatarCelula(subheaderPend, { font: { bold: true, size: 12 }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CORES.titulo } }, alignment: { horizontal: 'center' } });
