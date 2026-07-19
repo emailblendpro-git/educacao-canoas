@@ -331,9 +331,6 @@ function ItemProfessor({ p, escolaId }) {
             {tambemDaAula && (
               <span className="ponto" style={{ background: COR_TAMBEM_ENSINA }} title="Também dá aula" />
             )}
-            {observacoesAbertasCount > 0 && (
-              <span className="ponto" style={{ background: '#f44336' }} title={`${observacoesAbertasCount} observação(ões) aberta(s)`} />
-            )}
           </span>
           <div style={{ flex: 1 }}>
             <span className="painel-prof-nome">
