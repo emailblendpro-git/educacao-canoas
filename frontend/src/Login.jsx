@@ -4,8 +4,10 @@ import { api } from './api';
 export default function Login({ onLogin }) {
   const [login, setLogin] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
+  const [mostrarAjuda, setMostrarAjuda] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -34,12 +36,38 @@ export default function Login({ onLogin }) {
         </label>
         <label>
           Senha
-          <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} />
+          <div className="campo-senha">
+            <input
+              type={mostrarSenha ? 'text' : 'password'}
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+            />
+            <button
+              type="button"
+              className="botao-mostrar-senha"
+              onClick={() => setMostrarSenha((v) => !v)}
+              tabIndex={-1}
+            >
+              {mostrarSenha ? '🙈' : '👁️'}
+            </button>
+          </div>
         </label>
         {erro && <p className="erro">{erro}</p>}
         <button type="submit" disabled={carregando}>
           {carregando ? 'Entrando...' : 'Entrar'}
         </button>
+        <button
+          type="button"
+          className="link-esqueci-senha"
+          onClick={() => setMostrarAjuda((v) => !v)}
+        >
+          Esqueci minha senha
+        </button>
+        {mostrarAjuda && (
+          <p className="dica-recuperacao">
+            Para recuperar o acesso, entre em contato com a secretaria ou com o administrador do sistema para que sua senha seja redefinida.
+          </p>
+        )}
       </form>
     </div>
   );

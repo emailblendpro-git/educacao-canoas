@@ -431,6 +431,52 @@
   font-size: 14px;
 }
 
+.campo-senha {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.campo-senha input {
+  flex: 1;
+}
+
+.botao-mostrar-senha {
+  background: none !important;
+  border: none !important;
+  padding: 4px 6px !important;
+  margin: 0 !important;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.link-esqueci-senha {
+  background: none !important;
+  color: var(--accent) !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: center;
+}
+
+.link-esqueci-senha:hover {
+  color: var(--accent-hover) !important;
+}
+
+.dica-recuperacao {
+  font-size: 12px;
+  color: #666;
+  background: #f5f5f5;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 0;
+}
+
 /* ---------- Pendências ---------- */
 .pendencias-container {
   max-width: 780px;
