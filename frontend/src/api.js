@@ -66,4 +66,45 @@ export const api = {
   buscarAcessos: (escolaId) => request(`/escolas/${escolaId}/acessos`),
   resetarSenha: (usuarioId) =>
     request(`/usuarios/${usuarioId}/resetar-senha`, { method: 'PATCH' }),
+  analisarPlanilhaEscola: async (arquivo) => {
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('arquivo', arquivo);
+    const res = await fetch(`${API_URL}/escolas/importar`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.erro || `Erro ${res.status}`);
+    return data;
+  },
+  confirmarImportacaoEscola: async (arquivo) => {
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('arquivo', arquivo);
+    const res = await fetch(`${API_URL}/escolas/importar/confirmar`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.erro || `Erro ${res.status}`);
+    return data;
+  },
+  baixarRelatorioPendenciasEscola: async (arquivo) => {
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('arquivo', arquivo);
+    const res = await fetch(`${API_URL}/escolas/importar/relatorio`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.erro || 'Erro ao gerar relatório');
+    }
+    return res.blob();
+  },
 };

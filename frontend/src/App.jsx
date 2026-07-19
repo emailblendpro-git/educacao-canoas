@@ -4,6 +4,7 @@ import Pendencias from './Pendencias';
 import Painel from './Painel';
 import GestaoEscolar from './Administrativo';
 import Acessos from './Acessos';
+import ImportarEscola from './ImportarEscola';
 import { api } from './api';
 import './App.css';
 
@@ -105,6 +106,15 @@ export default function App() {
             </button>
           )}
 
+          {usuario.perfil === 'admin' && (
+            <button
+              className={tela === 'importar-escola' ? 'nav-ativo' : ''}
+              onClick={() => setTela('importar-escola')}
+            >
+              Importar Escola
+            </button>
+          )}
+
           {vePerfilGlobal && (
             <select
               value={escolaSelecionada || ''}
@@ -133,6 +143,7 @@ export default function App() {
       {tela === 'painel' && <Painel escolaId={escolaId} onVerPendencias={irParaPendencias} onEscolaNomeChange={setEscolaNomeAtual} />}
       {tela === 'gestao-escolar' && <GestaoEscolar escolaId={escolaId} />}
       {tela === 'acessos' && <Acessos escolaId={escolaId} />}
+      {tela === 'importar-escola' && usuario.perfil === 'admin' && <ImportarEscola />}
     </div>
   );
 }

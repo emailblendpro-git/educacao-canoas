@@ -11,6 +11,7 @@ const administrativoRouter = require('./routes/administrativo');
 const exportarRouter = require('./routes/exportar');
 const matrizCurricularRouter = require('./routes/matriz-curricular');
 const ocorrenciasRouter = require('./routes/ocorrencias');
+const importacaoRouter = require('./routes/importacao');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,6 +28,7 @@ app.use(administrativoRouter);
 app.use(exportarRouter);
 app.use(matrizCurricularRouter);
 app.use(ocorrenciasRouter);
+app.use(importacaoRouter);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
