@@ -1,12 +1,14 @@
 require('dotenv').config();
 const { Pool } = require('pg');
 
-console.log('[DB] DATABASE_URL definida?', !!process.env.DATABASE_URL);
-console.log('[DB] DATABASE_URL length:', process.env.DATABASE_URL?.length);
+const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:f8loAwi5WsJurjTz@db.oynbssmxzpyykbihoffl.supabase.co:5432/postgres';
+
+console.log('[DB] DATABASE_URL definida?', !!dbUrl);
+console.log('[DB] DATABASE_URL length:', dbUrl?.length);
 console.log('[DB] NODE_ENV:', process.env.NODE_ENV);
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: dbUrl,
   ssl: { rejectUnauthorized: false }
 });
 
