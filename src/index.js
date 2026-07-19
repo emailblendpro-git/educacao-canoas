@@ -17,17 +17,6 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-
-app.get('/debug/env', (req, res) => {
-  res.json({
-    DATABASE_URL_DEFINED: !!process.env.DATABASE_URL,
-    DATABASE_URL_LENGTH: process.env.DATABASE_URL?.length || 0,
-    DATABASE_URL_FIRST_50: process.env.DATABASE_URL?.substring(0, 50) || 'UNDEFINED',
-    NODE_ENV: process.env.NODE_ENV,
-    JWT_SECRET_DEFINED: !!process.env.JWT_SECRET,
-  });
-});
-
 app.use(escolasRouter);
 app.use(authRouter);
 app.use(pendenciasRouter);
