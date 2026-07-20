@@ -337,6 +337,7 @@ function ItemProfessor({ p, escolaId }) {
               {p.nome}
               {p.tem_desdobro && <span style={{ marginLeft: '8px', fontSize: '11px', background: '#ff9800', color: 'white', padding: '2px 6px', borderRadius: '3px', fontWeight: 'bold' }}>Desdobro</span>}
               {p.status_professor === 'readaptado' && <span style={{ marginLeft: '8px', fontSize: '11px', background: '#2196f3', color: 'white', padding: '2px 6px', borderRadius: '3px', fontWeight: 'bold' }}>Readaptação</span>}
+              {p.tipo_vinculo === 'contratado' && <span style={{ marginLeft: '8px', fontSize: '11px', background: '#9c27b0', color: 'white', padding: '2px 6px', borderRadius: '3px', fontWeight: 'bold' }}>Contratado</span>}
             </span>
             <span className="painel-prof-detalhe">
               {(() => {
