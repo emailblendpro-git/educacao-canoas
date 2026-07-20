@@ -141,7 +141,112 @@ router.get('/escolas/:id/exportar', autenticar, async (req, res) => {
       { width: 12 },
     ];
 
-    // ===== ABA 2: ADMINISTRATIVO =====
+    // ===== ABA 2: GRADE DE AULAS =====
+    const abaGrade = workbook.addWorksheet('Grade de Aulas');
+
+    abaGrade.mergeCells('A1:G1');
+    const headerGrade = abaGrade.getCell('A1');
+    headerGrade.value = escolaNome;
+    formatarCelula(headerGrade, { font: { bold: true, size: 14 }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CORES.cabecalho } }, alignment: { horizontal: 'center' } });
+    headerGrade.font.color = { argb: 'FFFFFFFF' };
+
+    abaGrade.mergeCells('A2:G2');
+    const subheaderGrade = abaGrade.getCell('A2');
+    subheaderGrade.value = 'GRADE DE AULAS — TURMA x DISCIPLINA x PROFESSOR';
+    formatarCelula(subheaderGrade, { font: { bold: true, size: 12 }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CORES.titulo } }, alignment: { horizontal: 'center' } });
+    subheaderGrade.font.color = { argb: 'FFFFFFFF' };
+
+    const colsGrade = ['Turno', 'Turma', 'Disciplina', 'Professor(es)', 'Períodos Alocados', 'Períodos Obrigatórios', 'Status'];
+    colsGrade.forEach((col, i) => {
+      const cell = abaGrade.getCell(String.fromCharCode(65 + i) + '4');
+      cell.value = col;
+      formatarCelula(cell, { font: { bold: true, color: { argb: 'FFFFFFFF' } }, fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: CORES.titulo } } });
+    });
+
+    const TURNO_LABEL = { manha: 'Manhã', tarde: 'Tarde', noite: 'Noite', integral: 'Integral' };
+
+    const gradeRes = await pool.query(
+      `WITH requeridos AS (
+         SELECT t.id turma_id, t.ano_escolar, t.turno, t.identificador, d.sigla, m.periodos_semana obrigatorio
+         FROM turmas t
+         JOIN matriz_curricular_global m ON m.ano_escolar = t.ano_escolar
+         JOIN disciplinas d ON d.id = m.disciplina_id
+         WHERE t.escola_id = $1 AND t.ano_escolar IN ('1','2','3','4','5')
+         UNION ALL
+         SELECT t.id, t.ano_escolar, t.turno, t.identificador, d.sigla, mp.periodos_semana
+         FROM turmas t
+         JOIN matriz_projetos_escola mp ON mp.escola_id = t.escola_id AND mp.ano_escolar = t.ano_escolar
+         JOIN disciplinas d ON d.id = mp.disciplina_id
+         WHERE t.escola_id = $1 AND t.ano_escolar IN ('1','2','3','4','5') AND d.sigla IN ('PPA','PLL','TICs','A')
+         UNION ALL
+         SELECT t.id, t.ano_escolar, t.turno, t.identificador, d.sigla, m.periodos_semana
+         FROM turmas t
+         JOIN matriz_curricular_global m ON m.ano_escolar = t.ano_escolar
+         JOIN disciplinas d ON d.id = m.disciplina_id
+         WHERE t.escola_id = $1 AND t.ano_escolar NOT IN ('1','2','3','4','5')
+       ),
+       alocado AS (
+         SELECT a.turma_id, d.sigla, SUM(a.periodos) periodos_alocados,
+                array_agg(DISTINCT p.nome ORDER BY p.nome) professores,
+                MAX(CASE WHEN cf.id IS NOT NULL THEN 1 ELSE 0 END) tem_administrativo
+         FROM alocacoes a
+         JOIN disciplinas d ON d.id = a.disciplina_id
+         JOIN professores p ON p.id = a.professor_id
+         LEFT JOIN cargos_funcoes cf ON cf.id = p.cargo_funcao_id
+         GROUP BY a.turma_id, d.sigla
+       )
+       SELECT r.turma_id, r.ano_escolar, r.turno, r.identificador, r.sigla, r.obrigatorio,
+              COALESCE(al.periodos_alocados, 0) AS alocado, al.professores,
+              COALESCE(al.tem_administrativo, 0) AS tem_administrativo
+       FROM requeridos r
+       LEFT JOIN alocado al ON al.turma_id = r.turma_id AND al.sigla = r.sigla
+       ORDER BY r.turno, r.ano_escolar, r.identificador, r.sigla`,
+      [escolaId]
+    );
+
+    let rowGrade = 5;
+    gradeRes.rows.forEach((g) => {
+      const alocado = Number(g.alocado);
+      const obrigatorio = Number(g.obrigatorio);
+      const temAdministrativo = !!Number(g.tem_administrativo);
+
+      let status;
+      let corStatus;
+      if (temAdministrativo) { status = 'ADMINISTRADA'; corStatus = null; }
+      else if (alocado <= 0) { status = 'VAGA'; corStatus = CORES.erro; }
+      else if (alocado < obrigatorio) { status = 'PARCIAL'; corStatus = CORES.parcial; }
+      else { status = 'COMPLETA'; corStatus = CORES.sucesso; }
+
+      abaGrade.getCell(`A${rowGrade}`).value = TURNO_LABEL[g.turno] || g.turno;
+      abaGrade.getCell(`B${rowGrade}`).value = `${g.ano_escolar}${g.identificador}`;
+      abaGrade.getCell(`C${rowGrade}`).value = g.sigla;
+      abaGrade.getCell(`D${rowGrade}`).value = (g.professores || []).join(', ') || 'VAGA';
+      abaGrade.getCell(`E${rowGrade}`).value = alocado;
+      abaGrade.getCell(`F${rowGrade}`).value = obrigatorio;
+      abaGrade.getCell(`G${rowGrade}`).value = status;
+
+      for (let i = 0; i < 7; i++) {
+        const cell = abaGrade.getCell(String.fromCharCode(65 + i) + rowGrade);
+        formatarCelula(cell, { alignment: { horizontal: (i === 3) ? 'left' : 'center' } });
+        if (i === 6 && corStatus) {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: corStatus } };
+          cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        }
+      }
+      rowGrade++;
+    });
+
+    abaGrade.columns = [
+      { width: 12 },
+      { width: 10 },
+      { width: 14 },
+      { width: 35 },
+      { width: 16 },
+      { width: 18 },
+      { width: 14 },
+    ];
+
+    // ===== ABA 3: ADMINISTRATIVO =====
     const abaAdmin = workbook.addWorksheet('Administrativo');
 
     abaAdmin.mergeCells('A1:C1');
@@ -198,7 +303,7 @@ router.get('/escolas/:id/exportar', autenticar, async (req, res) => {
       { width: 15 },
     ];
 
-    // ===== ABA 3: PENDÊNCIAS =====
+    // ===== ABA 4: PENDÊNCIAS =====
     const abaPend = workbook.addWorksheet('Pendências');
 
     abaPend.mergeCells('A1:B1');
