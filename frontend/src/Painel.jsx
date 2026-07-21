@@ -99,6 +99,9 @@ function EditorDisciplina({ editando, escolaId, onFechar, onSalvo }) {
 function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
   const porTurno = agruparGrade(grade);
   const [editando, setEditando] = useState(null);
+  // ao passar o mouse numa célula, guarda os ids do(s) professor(es) dela pra
+  // destacar (glow) todas as outras células desses mesmos professores na grade.
+  const [hoverProfIds, setHoverProfIds] = useState(null);
   const GRADE_ESQUERDA = ['LP', 'ER', 'M', 'C', 'H', 'G'];
   const GRADE_DIREITA = ['PPA', 'PLL', 'TICs', 'A', 'EF'];
 
@@ -167,12 +170,16 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
                   </td>
                   {GRADE_ESQUERDA.map(s => {
                     const d = mapDisciplinas[s];
+                    const destacado = !!(d && hoverProfIds && (d.professor_ids || []).some(id => hoverProfIds.includes(id)));
+                    const apagado = !!(d && hoverProfIds && !destacado);
                     return (
                       <td key={s} style={{ padding: '4px 2px', textAlign: 'center', borderRight: '1px solid #ddd' }}>
                         {d ? (
                           <button
                             type="button"
                             onClick={() => abrirEditor(t, turno, d)}
+                            onMouseEnter={() => d.professor_ids && setHoverProfIds(d.professor_ids)}
+                            onMouseLeave={() => setHoverProfIds(null)}
                             style={{
                               background: corCelulaGrade(d.obrigatorio, Number(d.alocado), Number(d.tem_administrativo)),
                               color: 'white',
@@ -183,6 +190,12 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
                               fontWeight: '600',
                               cursor: 'pointer',
                               width: '100%',
+                              position: 'relative',
+                              zIndex: destacado ? 2 : 1,
+                              opacity: apagado ? 0.35 : 1,
+                              boxShadow: destacado ? '0 0 0 2px #ffd600, 0 0 8px 3px rgba(255,214,0,0.7)' : 'none',
+                              transform: destacado ? 'scale(1.1)' : 'scale(1)',
+                              transition: 'opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease',
                             }}
                             title={`${d.sigla}: ${d.alocado}/${d.obrigatorio}${d.tem_administrativo ? ' — administrado' : ''}${d.professores ? ' — ' + d.professores.join(', ') : ''}`}
                           >
@@ -197,12 +210,16 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
                   <td style={{ width: '8px', background: 'white', borderRight: '8px solid white' }}></td>
                   {GRADE_DIREITA.map(s => {
                     const d = mapDisciplinas[s];
+                    const destacado = !!(d && hoverProfIds && (d.professor_ids || []).some(id => hoverProfIds.includes(id)));
+                    const apagado = !!(d && hoverProfIds && !destacado);
                     return (
                       <td key={s} style={{ padding: '4px 2px', textAlign: 'center', borderRight: '1px solid #ddd' }}>
                         {d ? (
                           <button
                             type="button"
                             onClick={() => abrirEditor(t, turno, d)}
+                            onMouseEnter={() => d.professor_ids && setHoverProfIds(d.professor_ids)}
+                            onMouseLeave={() => setHoverProfIds(null)}
                             style={{
                               background: corCelulaGrade(d.obrigatorio, Number(d.alocado), Number(d.tem_administrativo)),
                               color: 'white',
@@ -213,6 +230,12 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
                               fontWeight: '600',
                               cursor: 'pointer',
                               width: '100%',
+                              position: 'relative',
+                              zIndex: destacado ? 2 : 1,
+                              opacity: apagado ? 0.35 : 1,
+                              boxShadow: destacado ? '0 0 0 2px #ffd600, 0 0 8px 3px rgba(255,214,0,0.7)' : 'none',
+                              transform: destacado ? 'scale(1.1)' : 'scale(1)',
+                              transition: 'opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease',
                             }}
                             title={`${d.sigla}: ${d.alocado}/${d.obrigatorio}${d.tem_administrativo ? ' — administrado' : ''}${d.professores ? ' — ' + d.professores.join(', ') : ''}`}
                           >
@@ -248,7 +271,7 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
           <span className="ponto" style={{ background: '#e57373' }} /> vaga
           <span className="ponto" style={{ background: '#9e9e9e' }} /> administrada
         </p>
-        <p className="dica">Clique numa célula para editar a disciplina.</p>
+        <p className="dica">Clique numa célula para editar a disciplina. Passe o mouse pra destacar as outras turmas/disciplinas do mesmo professor.</p>
       </div>
 
       {turnosOrdenados.length > 0 && (
