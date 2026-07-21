@@ -105,8 +105,21 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
   const GRADE_ESQUERDA = ['LP', 'ER', 'M', 'C', 'H', 'G'];
   const GRADE_DIREITA = ['PPA', 'PLL', 'TICs', 'A', 'EF'];
 
-  function abrirEditor(t, turno, d) {
+  // largura aproximada do popup do editor -- usada só pra decidir de que lado
+  // da célula ele abre (evita nascer cortado fora da tela).
+  const POPUP_LARGURA = 300;
+
+  function calcularPosicaoPopup(rect) {
+    const espacoDireita = window.innerWidth - rect.right;
+    const abrirParaDireita = espacoDireita >= POPUP_LARGURA + 16;
+    const left = abrirParaDireita ? rect.right + 8 : Math.max(8, rect.left - POPUP_LARGURA - 8);
+    const top = Math.min(rect.top, window.innerHeight - 260);
+    return { top: Math.max(8, top), left };
+  }
+
+  function abrirEditor(t, turno, d, evento) {
     if (somenteLeitura) return;
+    const rect = evento.currentTarget.getBoundingClientRect();
     setEditando({
       turmaId: t.turma_id,
       sigla: d.sigla,
@@ -114,6 +127,7 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
       obrigatorio: d.obrigatorio,
       profId: d.professor_ids ? d.professor_ids[0] : null,
       profNome: d.professores ? d.professores.join(', ') : null,
+      posicao: calcularPosicaoPopup(rect),
     });
   }
 
@@ -177,7 +191,7 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
                         {d ? (
                           <button
                             type="button"
-                            onClick={() => abrirEditor(t, turno, d)}
+                            onClick={(evento) => abrirEditor(t, turno, d, evento)}
                             onMouseEnter={() => d.professor_ids && setHoverProfIds(d.professor_ids)}
                             onMouseLeave={() => setHoverProfIds(null)}
                             style={{
@@ -217,7 +231,7 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
                         {d ? (
                           <button
                             type="button"
-                            onClick={() => abrirEditor(t, turno, d)}
+                            onClick={(evento) => abrirEditor(t, turno, d, evento)}
                             onMouseEnter={() => d.professor_ids && setHoverProfIds(d.professor_ids)}
                             onMouseLeave={() => setHoverProfIds(null)}
                             style={{
@@ -289,17 +303,20 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
                     <MatrizCurricular escolaId={escolaId} anosEscolares={anosEscolares} somenteLeitura={somenteLeitura} />
                   </div>
                 </div>
-                {editando && Object.values(turmas).some(t => t.turma_id === editando.turmaId) && (
-                  <EditorDisciplina
-                    editando={editando}
-                    escolaId={escolaId}
-                    onFechar={() => setEditando(null)}
-                    onSalvo={salvo}
-                  />
-                )}
               </div>
             );
           })}
+        </div>
+      )}
+
+      {editando && (
+        <div style={{ position: 'fixed', top: editando.posicao.top, left: editando.posicao.left, zIndex: 1000, width: POPUP_LARGURA }}>
+          <EditorDisciplina
+            editando={editando}
+            escolaId={escolaId}
+            onFechar={() => setEditando(null)}
+            onSalvo={salvo}
+          />
         </div>
       )}
     </div>
