@@ -96,13 +96,14 @@ function EditorDisciplina({ editando, escolaId, onFechar, onSalvo }) {
   );
 }
 
-function BlocoGradeTurnos({ grade, escolaId, onMudou }) {
+function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
   const porTurno = agruparGrade(grade);
   const [editando, setEditando] = useState(null);
   const GRADE_ESQUERDA = ['LP', 'ER', 'M', 'C', 'H', 'G'];
   const GRADE_DIREITA = ['PPA', 'PLL', 'TICs', 'A', 'EF'];
 
   function abrirEditor(t, turno, d) {
+    if (somenteLeitura) return;
     setEditando({
       turmaId: t.turma_id,
       sigla: d.sigla,
@@ -262,7 +263,7 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou }) {
                     {renderizarGradeTurno(turno, turmas)}
                   </div>
                   <div style={{ flex: '0 0 auto', maxWidth: '500px' }}>
-                    <MatrizCurricular escolaId={escolaId} anosEscolares={anosEscolares} />
+                    <MatrizCurricular escolaId={escolaId} anosEscolares={anosEscolares} somenteLeitura={somenteLeitura} />
                   </div>
                 </div>
                 {editando && Object.values(turmas).some(t => t.turma_id === editando.turmaId) && (
@@ -289,7 +290,7 @@ function extrairPEB(areaConcurso) {
   return '';
 }
 
-function ItemProfessor({ p, escolaId }) {
+function ItemProfessor({ p, escolaId, somenteLeitura }) {
   const [aberto, setAberto] = useState(false);
   const [alocacoes, setAlocacoes] = useState(null);
   const [observacoesAbertasCount, setObservacoesAbertasCount] = useState(0);
@@ -386,7 +387,7 @@ function ItemProfessor({ p, escolaId }) {
             </table>
           )}
           <div>
-            <ObservacoesTab professorId={p.id} escolaId={escolaId} />
+            <ObservacoesTab professorId={p.id} escolaId={escolaId} somenteLeitura={somenteLeitura} />
           </div>
         </div>
       )}
@@ -398,7 +399,7 @@ function ItemProfessor({ p, escolaId }) {
               <h3 style={{ margin: 0 }}>📝 Observações de {p.nome}</h3>
               <button onClick={() => setObservacoesAberto(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer' }}>×</button>
             </div>
-            <ObservacoesTab professorId={p.id} escolaId={escolaId} />
+            <ObservacoesTab professorId={p.id} escolaId={escolaId} somenteLeitura={somenteLeitura} />
           </div>
         </div>
       )}
@@ -406,7 +407,7 @@ function ItemProfessor({ p, escolaId }) {
   );
 }
 
-function BlocoProfessores({ professores, escolaId }) {
+function BlocoProfessores({ professores, escolaId, somenteLeitura }) {
   return (
     <div className="painel-bloco">
       <h2>Carga horária dos professores</h2>
@@ -423,14 +424,14 @@ function BlocoProfessores({ professores, escolaId }) {
       <p className="dica">Clique num professor pra ver onde ele está atuando.</p>
       <ul className="painel-professores">
         {professores.map((p) => (
-          <ItemProfessor key={p.id} p={p} escolaId={escolaId} />
+          <ItemProfessor key={p.id} p={p} escolaId={escolaId} somenteLeitura={somenteLeitura} />
         ))}
       </ul>
     </div>
   );
 }
 
-export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }) {
+export default function Painel({ escolaId, somenteLeitura, onVerPendencias, onEscolaNomeChange }) {
   const [painel, setPainel] = useState(null);
   const [erro, setErro] = useState('');
   const [secaoAtiva, setSecaoAtiva] = useState('grade');
@@ -509,6 +510,7 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
 
   // Funções para editar observação
   const abrirEditarObservacao = (obs) => {
+    if (somenteLeitura) return;
     setObsEditando(obs);
     setTextoEditando(obs.texto);
   };
@@ -560,11 +562,11 @@ export default function Painel({ escolaId, onVerPendencias, onEscolaNomeChange }
         />
         {secaoAtiva === 'grade' && (
           <div style={{ padding: '20px' }}>
-            <BlocoGradeTurnos grade={painel.grade} escolaId={escolaId} onMudou={carregar} />
+            <BlocoGradeTurnos grade={painel.grade} escolaId={escolaId} onMudou={carregar} somenteLeitura={somenteLeitura} />
           </div>
         )}
         {secaoAtiva === 'professores' && (
-          <BlocoProfessores professores={painel.professores} escolaId={escolaId} />
+          <BlocoProfessores professores={painel.professores} escolaId={escolaId} somenteLeitura={somenteLeitura} />
         )}
       </div>
 

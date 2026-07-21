@@ -104,7 +104,7 @@ function EditarCelula({ valor, onSave, editavel }) {
   );
 }
 
-function TabelaMatriz({ anos, disciplinas, disciplinasDireita, matrizPorAno, onAtualizar }) {
+function TabelaMatriz({ anos, disciplinas, disciplinasDireita, matrizPorAno, onAtualizar, somenteLeitura }) {
   function calcularTotal(ano, mapDisciplinas) {
     const allDisciplinas = [...disciplinas, ...(disciplinasDireita || [])];
     return allDisciplinas.reduce((sum, sigla) => {
@@ -169,7 +169,7 @@ function TabelaMatriz({ anos, disciplinas, disciplinasDireita, matrizPorAno, onA
                 </td>
                 {disciplinas.map(s => {
                   const d = mapDisciplinas[s];
-                  const editavel = DISCIPLINAS_EDITAVEIS.includes(s);
+                  const editavel = !somenteLeitura && DISCIPLINAS_EDITAVEIS.includes(s);
                   return (
                     <td key={s} style={{ padding: '4px 2px', textAlign: 'center', borderRight: '1px solid #ddd' }}>
                       {d ? (
@@ -189,7 +189,7 @@ function TabelaMatriz({ anos, disciplinas, disciplinasDireita, matrizPorAno, onA
                     <td style={{ width: '8px', background: 'white', borderRight: '8px solid white' }}></td>
                     {disciplinasDireita.map(s => {
                       const d = mapDisciplinas[s];
-                      const editavel = DISCIPLINAS_EDITAVEIS.includes(s);
+                      const editavel = !somenteLeitura && DISCIPLINAS_EDITAVEIS.includes(s);
                       return (
                         <td key={s} style={{ padding: '4px 2px', textAlign: 'center', borderRight: '1px solid #ddd' }}>
                           {d ? (
@@ -226,7 +226,7 @@ function TabelaMatriz({ anos, disciplinas, disciplinasDireita, matrizPorAno, onA
   );
 }
 
-export default function MatrizCurricular({ escolaId, anosEscolares }) {
+export default function MatrizCurricular({ escolaId, anosEscolares, somenteLeitura }) {
   const [matriz, setMatriz] = useState(null);
   const [erro, setErro] = useState('');
 
@@ -277,6 +277,7 @@ export default function MatrizCurricular({ escolaId, anosEscolares }) {
           disciplinasDireita={DISCIPLINAS_1A5_DIREITA}
           matrizPorAno={matriz.matrizPorAno}
           onAtualizar={handleAtualizar}
+          somenteLeitura={somenteLeitura}
         />
       )}
       {anos6a9.length > 0 && (
@@ -286,6 +287,7 @@ export default function MatrizCurricular({ escolaId, anosEscolares }) {
           disciplinasDireita={null}
           matrizPorAno={matriz.matrizPorAno}
           onAtualizar={handleAtualizar}
+          somenteLeitura={somenteLeitura}
         />
       )}
     </div>

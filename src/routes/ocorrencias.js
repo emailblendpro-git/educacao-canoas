@@ -1,11 +1,11 @@
 const express = require('express');
 const pool = require('../db');
-const { autenticar, PERFIS_GLOBAIS } = require('../middleware/auth');
+const { autenticar, PERFIS_GLOBAIS, apenasEscrita } = require('../middleware/auth');
 
 const router = express.Router();
 
 // Criar observação para professor
-router.post('/professores/:id/observacoes', autenticar, async (req, res) => {
+router.post('/professores/:id/observacoes', autenticar, apenasEscrita, async (req, res) => {
   const professorId = Number(req.params.id);
   const { data, texto, escolaId } = req.body;
 
@@ -92,7 +92,7 @@ router.get('/professores/:id/observacoes/contar/abertas', autenticar, async (req
 });
 
 // Encerrar observação (muda status para 'encerrada')
-router.patch('/professores/:id/observacoes/:obsId/encerrar', autenticar, async (req, res) => {
+router.patch('/professores/:id/observacoes/:obsId/encerrar', autenticar, apenasEscrita, async (req, res) => {
   const professorId = Number(req.params.id);
   const obsId = Number(req.params.obsId);
   const { escolaId } = req.query;
@@ -126,7 +126,7 @@ router.patch('/professores/:id/observacoes/:obsId/encerrar', autenticar, async (
 });
 
 // Deletar observação (apenas se for do mesmo diretor/secretário)
-router.delete('/professores/:id/observacoes/:obsId', autenticar, async (req, res) => {
+router.delete('/professores/:id/observacoes/:obsId', autenticar, apenasEscrita, async (req, res) => {
   const professorId = Number(req.params.id);
   const obsId = Number(req.params.obsId);
   const { escolaId } = req.query;

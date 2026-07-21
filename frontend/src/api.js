@@ -66,6 +66,8 @@ export const api = {
   buscarAcessos: (escolaId) => request(`/escolas/${escolaId}/acessos`),
   resetarSenha: (usuarioId) =>
     request(`/usuarios/${usuarioId}/resetar-senha`, { method: 'PATCH' }),
+  criarUsuario: (payload) =>
+    request('/usuarios', { method: 'POST', body: JSON.stringify(payload) }),
   analisarPlanilhaEscola: async (arquivo) => {
     const token = localStorage.getItem('token');
     const formData = new FormData();

@@ -15,8 +15,23 @@ function autenticar(req, res, next) {
   }
 }
 
-// perfis com visão de todas as escolas (admin/secretaria central); os demais
-// (diretor, visualizacao) ficam presos à própria escola.
-const PERFIS_GLOBAIS = new Set(['admin', 'secretaria_central']);
+// perfis com visão de todas as escolas (escopo); diretor fica preso à própria
+// escola. "visualizacao" também é global, mas sem permissão de escrita --
+// ver `apenasEscrita` e `PERFIS_GESTAO` abaixo.
+const PERFIS_GLOBAIS = new Set(['admin', 'secretaria_central', 'visualizacao']);
 
-module.exports = { autenticar, PERFIS_GLOBAIS };
+// perfis com permissão de gerenciar usuários (criar, resetar senha, ver a
+// lista de acessos) -- mais restrito que PERFIS_GLOBAIS, que agora inclui
+// "visualizacao" (só enxerga todas as escolas, não administra usuários).
+const PERFIS_GESTAO = new Set(['admin', 'secretaria_central']);
+
+// bloqueia qualquer rota de escrita para o perfil "visualizacao" (somente
+// consulta, em qualquer escola).
+function apenasEscrita(req, res, next) {
+  if (req.usuario.perfil === 'visualizacao') {
+    return res.status(403).json({ erro: 'Perfil de consulta não pode editar dados' });
+  }
+  next();
+}
+
+module.exports = { autenticar, PERFIS_GLOBAIS, PERFIS_GESTAO, apenasEscrita };

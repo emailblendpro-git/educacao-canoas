@@ -16,7 +16,11 @@ function usuarioSalvo() {
   }
 }
 
-const PERFIS_GLOBAIS = new Set(['admin', 'secretaria_central']);
+// escopo (vê todas as escolas) -- "visualizacao" também é global, mas sem
+// permissão de escrita (ver `somenteLeitura` abaixo). Gestão de usuários
+// (aba Acessos) continua restrita a admin/secretaria_central.
+const PERFIS_GLOBAIS = new Set(['admin', 'secretaria_central', 'visualizacao']);
+const PERFIS_GESTAO = new Set(['admin', 'secretaria_central']);
 
 export default function App() {
   const [usuario, setUsuario] = useState(usuarioSalvo());
@@ -32,6 +36,8 @@ export default function App() {
   }
 
   const vePerfilGlobal = !!usuario && PERFIS_GLOBAIS.has(usuario.perfil);
+  const veGestao = !!usuario && PERFIS_GESTAO.has(usuario.perfil);
+  const somenteLeitura = !!usuario && usuario.perfil === 'visualizacao';
 
   useEffect(() => {
     if (usuario && vePerfilGlobal) {
@@ -97,7 +103,7 @@ export default function App() {
             Gestão Escolar
           </button>
 
-          {vePerfilGlobal && (
+          {veGestao && (
             <button
               className={tela === 'acessos' ? 'nav-ativo' : ''}
               onClick={() => setTela('acessos')}
@@ -140,9 +146,9 @@ export default function App() {
       </nav>
 
       {tela === 'pendencias' && <Pendencias usuario={usuario} filtroTipo={filtroPendencias} onLimparFiltro={() => setFiltroPendencias(null)} />}
-      {tela === 'painel' && <Painel escolaId={escolaId} onVerPendencias={irParaPendencias} onEscolaNomeChange={setEscolaNomeAtual} />}
+      {tela === 'painel' && <Painel escolaId={escolaId} somenteLeitura={somenteLeitura} onVerPendencias={irParaPendencias} onEscolaNomeChange={setEscolaNomeAtual} />}
       {tela === 'gestao-escolar' && <GestaoEscolar escolaId={escolaId} />}
-      {tela === 'acessos' && <Acessos escolaId={escolaId} />}
+      {tela === 'acessos' && <Acessos escolaId={escolaId} escolas={escolas} />}
       {tela === 'importar-escola' && usuario.perfil === 'admin' && <ImportarEscola />}
     </div>
   );

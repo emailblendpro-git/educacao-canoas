@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const pool = require('../db');
-const { autenticar, PERFIS_GLOBAIS } = require('../middleware/auth');
+const { autenticar, PERFIS_GLOBAIS, PERFIS_GESTAO } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -100,8 +100,8 @@ router.get('/escolas/:id/gestao-escolar', autenticar, async (req, res) => {
 router.get('/escolas/:id/acessos', autenticar, async (req, res) => {
   const escolaId = Number(req.params.id);
 
-  // Apenas admin pode ver todos; diretor vê apenas sua escola
-  if (!PERFIS_GLOBAIS.has(req.usuario.perfil) && escolaId !== req.usuario.escolaId) {
+  // Apenas admin/secretaria central podem ver acessos; diretor vê apenas sua escola
+  if (!PERFIS_GESTAO.has(req.usuario.perfil) && escolaId !== req.usuario.escolaId) {
     return res.status(403).json({ erro: 'Essa escola não é a sua' });
   }
 
@@ -133,8 +133,8 @@ router.get('/escolas/:id/acessos', autenticar, async (req, res) => {
 
 // Resetar senha de um usuário
 router.patch('/usuarios/:id/resetar-senha', autenticar, async (req, res) => {
-  // Apenas admin pode resetar senha
-  if (!PERFIS_GLOBAIS.has(req.usuario.perfil)) {
+  // Apenas admin/secretaria central podem resetar senha
+  if (!PERFIS_GESTAO.has(req.usuario.perfil)) {
     return res.status(403).json({ erro: 'Apenas administrador pode resetar senhas' });
   }
 
@@ -163,6 +163,59 @@ router.patch('/usuarios/:id/resetar-senha', autenticar, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: 'Erro ao resetar senha' });
+  }
+});
+
+const PERFIS_VALIDOS = new Set(['admin', 'secretaria_central', 'diretor', 'visualizacao']);
+
+// Criar novo usuário de acesso
+router.post('/usuarios', autenticar, async (req, res) => {
+  if (!PERFIS_GESTAO.has(req.usuario.perfil)) {
+    return res.status(403).json({ erro: 'Apenas administrador ou secretaria central podem criar usuários' });
+  }
+
+  const { nome, login, perfil } = req.body || {};
+  if (!nome || !login || !perfil) {
+    return res.status(400).json({ erro: 'nome, login e perfil são obrigatórios' });
+  }
+  if (!PERFIS_VALIDOS.has(perfil)) {
+    return res.status(400).json({ erro: `Perfil inválido. Use um de: ${[...PERFIS_VALIDOS].join(', ')}` });
+  }
+
+  // só "diretor" é escopado a uma escola -- os demais perfis (admin,
+  // secretaria_central, visualizacao) enxergam a rede inteira.
+  let escolaId = null;
+  if (perfil === 'diretor') {
+    escolaId = Number(req.body.escola_id) || null;
+    if (!escolaId) {
+      return res.status(400).json({ erro: 'escola_id é obrigatório para o perfil diretor' });
+    }
+  }
+
+  try {
+    const existente = await pool.query('SELECT id FROM usuarios WHERE login = $1', [login]);
+    if (existente.rows.length) {
+      return res.status(409).json({ erro: 'Login já está em uso' });
+    }
+
+    const senhaTemporaria = gerarSenhaAleatoria();
+    const senhaHash = await bcrypt.hash(senhaTemporaria, 10);
+
+    const result = await pool.query(
+      `INSERT INTO usuarios (nome, login, senha_hash, perfil, escola_id, ativo)
+       VALUES ($1, $2, $3, $4, $5, true)
+       RETURNING id, nome, login, perfil, escola_id`,
+      [nome, login, senhaHash, perfil, escolaId]
+    );
+
+    res.status(201).json({
+      usuario: result.rows[0],
+      senha_temporaria: senhaTemporaria,
+      mensagem: 'Usuário criado com sucesso. Compartilhe a senha temporária com o usuário.'
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erro: 'Erro ao criar usuário' });
   }
 });
 

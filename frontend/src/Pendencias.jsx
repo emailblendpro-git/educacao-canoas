@@ -79,7 +79,7 @@ const CATEGORIA_EXPLICACAO = {
   EJA: 'Uma turma de EJA (Educação de Jovens e Adultos) com nome que não foi reconhecido ou que apareceu duplicada na planilha.',
 };
 
-function ItemPendencia({ pendencia, onResolvido }) {
+function ItemPendencia({ pendencia, onResolvido, somenteLeitura }) {
   const [professorId, setProfessorId] = useState(null);
   const [observacao, setObservacao] = useState('');
   const [novoProfessor, setNovoProfessor] = useState(null);
@@ -134,53 +134,59 @@ function ItemPendencia({ pendencia, onResolvido }) {
       <p className="onde">{info.onde}</p>
       <p className="problema">{info.problema}</p>
 
-      {podeEscolherProfessor && <ProfessorPicker onSelect={setProfessorId} escolaId={pendencia.escola_id} />}
+      {somenteLeitura ? (
+        <p className="dica">Seu perfil é só consulta — não é possível resolver pendências.</p>
+      ) : (
+        <>
+          {podeEscolherProfessor && <ProfessorPicker onSelect={setProfessorId} escolaId={pendencia.escola_id} />}
 
-      {usaCadastroForm && (
-        <CorrigirCadastroForm
-          nome={d.nome || d.nomeRaw}
-          area={d.area}
-          ch={d.ch}
-          camposEditaveis={camposCadastro}
-          onValores={setNovoProfessor}
-        />
-      )}
-
-      {ehMatriculaDuplicada && (
-        <div className="duas-pessoas">
-          {(d.pessoas || []).map((pessoa, i) => (
+          {usaCadastroForm && (
             <CorrigirCadastroForm
-              key={i}
-              nome={pessoa.nome}
-              area={pessoa.area}
-              ch={pessoa.ch}
-              camposEditaveis={['matricula']}
-              onValores={(valores) => setDoisProfessores((atual) => {
-                const novo = [...atual];
-                novo[i] = valores;
-                return novo;
-              })}
+              nome={d.nome || d.nomeRaw}
+              area={d.area}
+              ch={d.ch}
+              camposEditaveis={camposCadastro}
+              onValores={setNovoProfessor}
             />
-          ))}
-        </div>
-      )}
+          )}
 
-      {ehEstagiario && (
-        <p className="dica">Esse tipo de vínculo (estagiário) não é suportado pelo sistema hoje — só dá pra marcar como resolvida com uma observação.</p>
-      )}
+          {ehMatriculaDuplicada && (
+            <div className="duas-pessoas">
+              {(d.pessoas || []).map((pessoa, i) => (
+                <CorrigirCadastroForm
+                  key={i}
+                  nome={pessoa.nome}
+                  area={pessoa.area}
+                  ch={pessoa.ch}
+                  camposEditaveis={['matricula']}
+                  onValores={(valores) => setDoisProfessores((atual) => {
+                    const novo = [...atual];
+                    novo[i] = valores;
+                    return novo;
+                  })}
+                />
+              ))}
+            </div>
+          )}
 
-      {usaGenerico && (
-        <textarea
-          placeholder="Observação (opcional)"
-          value={observacao}
-          onChange={(e) => setObservacao(e.target.value)}
-        />
-      )}
+          {ehEstagiario && (
+            <p className="dica">Esse tipo de vínculo (estagiário) não é suportado pelo sistema hoje — só dá pra marcar como resolvida com uma observação.</p>
+          )}
 
-      {erro && <p className="erro">{erro}</p>}
-      <button onClick={resolver} disabled={!podeEnviar()}>
-        {enviando ? 'Salvando...' : (podeEscolherProfessor || usaCadastroForm || ehMatriculaDuplicada) ? 'Resolver' : 'Marcar como resolvida'}
-      </button>
+          {usaGenerico && (
+            <textarea
+              placeholder="Observação (opcional)"
+              value={observacao}
+              onChange={(e) => setObservacao(e.target.value)}
+            />
+          )}
+
+          {erro && <p className="erro">{erro}</p>}
+          <button onClick={resolver} disabled={!podeEnviar()}>
+            {enviando ? 'Salvando...' : (podeEscolherProfessor || usaCadastroForm || ehMatriculaDuplicada) ? 'Resolver' : 'Marcar como resolvida'}
+          </button>
+        </>
+      )}
     </li>
   );
 }
@@ -205,6 +211,7 @@ export default function Pendencias({ usuario, filtroTipo, onLimparFiltro }) {
     setPendencias((atual) => atual.filter((p) => p.id !== id));
   }
 
+  const somenteLeitura = usuario.perfil === 'visualizacao';
   const visiveis = (pendencias || []).filter((p) => !filtroTipo || p.tipo === filtroTipo);
 
   const contagemPorCategoria = {};
@@ -249,7 +256,7 @@ export default function Pendencias({ usuario, filtroTipo, onLimparFiltro }) {
           </div>
           <ul className="lista-pendencias">
             {visiveis.map((p) => (
-              <ItemPendencia key={p.id} pendencia={p} onResolvido={handleResolvido} />
+              <ItemPendencia key={p.id} pendencia={p} onResolvido={handleResolvido} somenteLeitura={somenteLeitura} />
             ))}
           </ul>
         </>

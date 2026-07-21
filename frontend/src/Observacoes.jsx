@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
 
-export default function ObservacoesTab({ professorId, escolaId }) {
+export default function ObservacoesTab({ professorId, escolaId, somenteLeitura }) {
   const [observacoes, setObservacoes] = useState([]);
   const [aberto, setAberto] = useState(false);
   const [novaData, setNovaData] = useState(new Date().toISOString().split('T')[0]);
@@ -96,55 +96,57 @@ export default function ObservacoesTab({ professorId, escolaId }) {
 
       {aberto && (
         <div style={{ marginTop: '12px', padding: '12px', background: '#f5f5f5', borderRadius: '4px' }}>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', alignItems: 'flex-end' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>
-                Data
-              </label>
-              <input
-                type="date"
-                value={novaData}
-                onChange={(e) => setNovaData(e.target.value)}
-                style={{ padding: '6px', fontSize: '12px' }}
-              />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>
-                Observação
-              </label>
-              <textarea
-                value={novoTexto}
-                onChange={(e) => setNovoTexto(e.target.value)}
-                placeholder="Ex: Atestado médico 2 dias, Saída emergencial..."
-                rows="2"
+          {!somenteLeitura && (
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', alignItems: 'flex-end' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>
+                  Data
+                </label>
+                <input
+                  type="date"
+                  value={novaData}
+                  onChange={(e) => setNovaData(e.target.value)}
+                  style={{ padding: '6px', fontSize: '12px' }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>
+                  Observação
+                </label>
+                <textarea
+                  value={novoTexto}
+                  onChange={(e) => setNovoTexto(e.target.value)}
+                  placeholder="Ex: Atestado médico 2 dias, Saída emergencial..."
+                  rows="2"
+                  style={{
+                    padding: '6px',
+                    fontSize: '12px',
+                    fontFamily: 'inherit',
+                    width: '100%',
+                    maxWidth: '400px',
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={adicionarObservacao}
+                disabled={carregando || !novoTexto.trim()}
                 style={{
-                  padding: '6px',
+                  padding: '6px 12px',
                   fontSize: '12px',
-                  fontFamily: 'inherit',
-                  width: '100%',
-                  maxWidth: '400px',
+                  fontWeight: '600',
+                  background: '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  opacity: carregando ? 0.6 : 1,
                 }}
-              />
+              >
+                {carregando ? 'Salvando...' : 'Adicionar'}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={adicionarObservacao}
-              disabled={carregando || !novoTexto.trim()}
-              style={{
-                padding: '6px 12px',
-                fontSize: '12px',
-                fontWeight: '600',
-                background: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                opacity: carregando ? 0.6 : 1,
-              }}
-            >
-              {carregando ? 'Salvando...' : 'Adicionar'}
-            </button>
-          </div>
+          )}
 
           {erro && <p style={{ color: '#d32f2f', fontSize: '12px', marginBottom: '12px' }}>{erro}</p>}
 
@@ -170,40 +172,42 @@ export default function ObservacoesTab({ professorId, escolaId }) {
                       <div>
                         <strong>{obs.data}</strong> — {obs.texto}
                       </div>
-                      <div style={{ display: 'flex', gap: '6px', whiteSpace: 'nowrap' }}>
-                        <button
-                          type="button"
-                          onClick={() => encerrarObservacao(obs.id)}
-                          disabled={carregando}
-                          style={{
-                            padding: '2px 6px',
-                            fontSize: '11px',
-                            background: '#2196F3',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '3px',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Encerrar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => deletarObservacao(obs.id)}
-                          disabled={carregando}
-                          style={{
-                            padding: '2px 6px',
-                            fontSize: '11px',
-                            background: '#f44336',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '3px',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Deletar
-                        </button>
-                      </div>
+                      {!somenteLeitura && (
+                        <div style={{ display: 'flex', gap: '6px', whiteSpace: 'nowrap' }}>
+                          <button
+                            type="button"
+                            onClick={() => encerrarObservacao(obs.id)}
+                            disabled={carregando}
+                            style={{
+                              padding: '2px 6px',
+                              fontSize: '11px',
+                              background: '#2196F3',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '3px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Encerrar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deletarObservacao(obs.id)}
+                            disabled={carregando}
+                            style={{
+                              padding: '2px 6px',
+                              fontSize: '11px',
+                              background: '#f44336',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '3px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Deletar
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </li>
                 ))}

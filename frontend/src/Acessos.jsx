@@ -8,14 +8,24 @@ const PERFIL_LABELS = {
   visualizacao: 'Visualização',
 };
 
-export default function Acessos({ escolaId }) {
+const PERFIS_COM_ESCOLA = new Set(['diretor']);
+
+export default function Acessos({ escolaId, escolas }) {
   const [acessos, setAcessos] = useState([]);
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
   const [modalSenha, setModalSenha] = useState(null);
   const [resetando, setResetando] = useState(false);
 
-  useEffect(() => {
+  const [mostrarFormCriar, setMostrarFormCriar] = useState(false);
+  const [novoNome, setNovoNome] = useState('');
+  const [novoLogin, setNovoLogin] = useState('');
+  const [novoPerfil, setNovoPerfil] = useState('diretor');
+  const [novaEscolaId, setNovaEscolaId] = useState('');
+  const [criando, setCriando] = useState(false);
+  const [erroCriar, setErroCriar] = useState('');
+
+  function recarregarAcessos() {
     if (!escolaId) return;
     setCarregando(true);
     setErro('');
@@ -23,7 +33,50 @@ export default function Acessos({ escolaId }) {
       .then(setAcessos)
       .catch((err) => setErro(err.message))
       .finally(() => setCarregando(false));
+  }
+
+  useEffect(() => {
+    recarregarAcessos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [escolaId]);
+
+  function limparFormCriar() {
+    setNovoNome('');
+    setNovoLogin('');
+    setNovoPerfil('diretor');
+    setNovaEscolaId('');
+    setErroCriar('');
+  }
+
+  async function handleCriarUsuario() {
+    if (!novoNome.trim() || !novoLogin.trim()) {
+      setErroCriar('Preencha nome e login');
+      return;
+    }
+    if (PERFIS_COM_ESCOLA.has(novoPerfil) && !novaEscolaId) {
+      setErroCriar('Escolha a escola desse diretor');
+      return;
+    }
+
+    setCriando(true);
+    setErroCriar('');
+    try {
+      const result = await api.criarUsuario({
+        nome: novoNome.trim(),
+        login: novoLogin.trim(),
+        perfil: novoPerfil,
+        escola_id: PERFIS_COM_ESCOLA.has(novoPerfil) ? Number(novaEscolaId) : null,
+      });
+      setModalSenha(result);
+      limparFormCriar();
+      setMostrarFormCriar(false);
+      recarregarAcessos();
+    } catch (err) {
+      setErroCriar(err.message);
+    } finally {
+      setCriando(false);
+    }
+  }
 
   async function handleResetarSenha(usuario) {
     if (!window.confirm(`Tem certeza que quer resetar a senha de ${usuario.nome}?`)) return;
@@ -54,7 +107,94 @@ export default function Acessos({ escolaId }) {
         <p className="painel-legenda">
           Lista de usuários com acesso ao sistema para esta escola.
         </p>
+        <button
+          type="button"
+          onClick={() => setMostrarFormCriar((v) => !v)}
+          style={{
+            background: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+            marginTop: '8px',
+          }}
+        >
+          {mostrarFormCriar ? '× Cancelar' : '➕ Criar novo usuário'}
+        </button>
       </div>
+
+      {mostrarFormCriar && (
+        <div style={{ background: '#f5f5f5', padding: '16px', borderRadius: '6px', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Nome</label>
+              <input
+                type="text"
+                value={novoNome}
+                onChange={(e) => setNovoNome(e.target.value)}
+                style={{ padding: '8px', fontSize: '13px' }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Login</label>
+              <input
+                type="text"
+                value={novoLogin}
+                onChange={(e) => setNovoLogin(e.target.value)}
+                style={{ padding: '8px', fontSize: '13px' }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Perfil</label>
+              <select
+                value={novoPerfil}
+                onChange={(e) => setNovoPerfil(e.target.value)}
+                style={{ padding: '8px', fontSize: '13px' }}
+              >
+                <option value="admin">Administrador</option>
+                <option value="secretaria_central">Secretaria Central</option>
+                <option value="diretor">Diretor</option>
+                <option value="visualizacao">Visualização</option>
+              </select>
+            </div>
+            {PERFIS_COM_ESCOLA.has(novoPerfil) && (
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Escola</label>
+                <select
+                  value={novaEscolaId}
+                  onChange={(e) => setNovaEscolaId(e.target.value)}
+                  style={{ padding: '8px', fontSize: '13px' }}
+                >
+                  <option value="">Selecione...</option>
+                  {(escolas || []).map((e) => (
+                    <option key={e.id} value={e.id}>{e.nome}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={handleCriarUsuario}
+              disabled={criando}
+              style={{
+                background: '#2196f3',
+                color: 'white',
+                border: 'none',
+                padding: '9px 16px',
+                borderRadius: '4px',
+                cursor: criando ? 'not-allowed' : 'pointer',
+                fontWeight: 'bold',
+                opacity: criando ? 0.6 : 1,
+              }}
+            >
+              {criando ? 'Criando...' : 'Criar usuário'}
+            </button>
+          </div>
+          {erroCriar && <p className="erro" style={{ marginTop: '8px' }}>{erroCriar}</p>}
+        </div>
+      )}
 
       {acessos.length === 0 ? (
         <p className="dica">Nenhum usuário encontrado.</p>
@@ -244,14 +384,11 @@ export default function Acessos({ escolaId }) {
       <div style={{ marginTop: '24px', padding: '16px', background: '#f5f5f5', borderRadius: '6px' }}>
         <h3>Informações</h3>
         <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
-          <li><strong>Administrador:</strong> Acesso total ao sistema</li>
+          <li><strong>Administrador:</strong> Acesso total ao sistema (todas as escolas)</li>
           <li><strong>Secretaria Central:</strong> Gerencia todas as escolas</li>
           <li><strong>Diretor:</strong> Acesso restrito à sua escola</li>
-          <li><strong>Visualização:</strong> Apenas consulta dados</li>
+          <li><strong>Visualização:</strong> Todas as escolas, apenas consulta (não pode editar nada)</li>
         </ul>
-        <p style={{ fontSize: '12px', color: '#666', marginTop: '12px' }}>
-          📝 Nota: Para criar novos usuários ou resetar senhas, entre em contato com o administrador do sistema.
-        </p>
       </div>
     </div>
   );

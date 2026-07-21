@@ -1,6 +1,6 @@
 const express = require('express');
 const pool = require('../db');
-const { autenticar, PERFIS_GLOBAIS } = require('../middleware/auth');
+const { autenticar, PERFIS_GLOBAIS, apenasEscrita } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -51,7 +51,7 @@ router.get('/escolas/:id/matriz-curricular', autenticar, async (req, res) => {
 });
 
 // Atualizar períodos de uma disciplina na matriz
-router.patch('/escolas/:id/matriz-curricular/:anoEscolar/:disciplinaId', autenticar, async (req, res) => {
+router.patch('/escolas/:id/matriz-curricular/:anoEscolar/:disciplinaId', autenticar, apenasEscrita, async (req, res) => {
   const escolaId = Number(req.params.id);
   const anoEscolar = req.params.anoEscolar;
   const disciplinaId = Number(req.params.disciplinaId);

@@ -1,6 +1,6 @@
 const express = require('express');
 const pool = require('../db');
-const { autenticar, PERFIS_GLOBAIS } = require('../middleware/auth');
+const { autenticar, PERFIS_GLOBAIS, apenasEscrita } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -71,7 +71,7 @@ async function criarProfessor(client, { nome, area, ch, tipoVinculo, matricula, 
   return professorId;
 }
 
-router.patch('/pendencias/:id/resolver', autenticar, async (req, res) => {
+router.patch('/pendencias/:id/resolver', autenticar, apenasEscrita, async (req, res) => {
   const { id } = req.params;
   const { professor_id, observacao, novo_professor, professores } = req.body || {};
 

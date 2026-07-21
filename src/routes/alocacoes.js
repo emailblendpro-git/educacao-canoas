@@ -1,12 +1,12 @@
 const express = require('express');
 const pool = require('../db');
-const { autenticar, PERFIS_GLOBAIS } = require('../middleware/auth');
+const { autenticar, PERFIS_GLOBAIS, apenasEscrita } = require('../middleware/auth');
 
 const router = express.Router();
 
 // atribui, troca ou remove o professor responsável por uma disciplina numa
 // turma -- usado quando a diretora clica num chip da grade de aulas no Painel.
-router.patch('/turmas/:turmaId/alocacoes', autenticar, async (req, res) => {
+router.patch('/turmas/:turmaId/alocacoes', autenticar, apenasEscrita, async (req, res) => {
   const turmaId = Number(req.params.turmaId);
   const { disciplina_sigla, professor_id } = req.body || {};
   if (!disciplina_sigla) {
