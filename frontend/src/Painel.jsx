@@ -270,10 +270,16 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
     );
   }
 
-  // Ordenar turnos: manha, tarde, noite, eja (valores reais gravados no banco)
-  const ordemTurnos = ['manha', 'tarde', 'noite', 'eja'];
-  const turnosOrdenados = ordemTurnos.filter(t => porTurno[t]).map(t => [t, porTurno[t]]);
-  const TURNO_LABEL = { manha: 'MANHÃ', tarde: 'TARDE', noite: 'NOITE', eja: 'EJA' };
+  const TURNO_LABEL = { manha: 'MANHÃ', tarde: 'TARDE', noite: 'NOITE' };
+
+  // Manhã e Tarde usam a mesma Grade Curricular (ela depende só do ano
+  // escolar, não do turno) -- em vez de repetir a matriz ao lado de cada
+  // turno, mostra as duas grades lado a lado e a matriz uma única vez,
+  // combinando os anos escolares dos dois turnos.
+  const anosManhaTarde = [...new Set([
+    ...(porTurno.manha ? Object.values(porTurno.manha).map(t => t.ano_escolar) : []),
+    ...(porTurno.tarde ? Object.values(porTurno.tarde).map(t => t.ano_escolar) : []),
+  ])];
 
   return (
     <div>
@@ -288,24 +294,35 @@ function BlocoGradeTurnos({ grade, escolaId, onMudou, somenteLeitura }) {
         <p className="dica">Clique numa célula para editar a disciplina. Passe o mouse pra destacar as outras turmas/disciplinas do mesmo professor.</p>
       </div>
 
-      {turnosOrdenados.length > 0 && (
-        <div>
-          {turnosOrdenados.map(([turno, turmas]) => {
-            const anosEscolares = [...new Set(Object.values(turmas).map(t => t.ano_escolar))];
-            return (
-              <div key={turno} style={{ marginBottom: '20px' }}>
-                <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>{TURNO_LABEL[turno] || turno}</h3>
-                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                  <div style={{ flex: '0 0 auto', maxWidth: '500px' }}>
-                    {renderizarGradeTurno(turno, turmas)}
-                  </div>
-                  <div style={{ flex: '0 0 auto', maxWidth: '500px' }}>
-                    <MatrizCurricular escolaId={escolaId} anosEscolares={anosEscolares} somenteLeitura={somenteLeitura} />
-                  </div>
-                </div>
+      {(porTurno.manha || porTurno.tarde) && (
+        <div style={{ marginBottom: '20px', overflowX: 'auto' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', flexWrap: 'nowrap' }}>
+            {porTurno.manha && (
+              <div style={{ flex: '0 0 auto', maxWidth: '500px' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>{TURNO_LABEL.manha}</h3>
+                {renderizarGradeTurno('manha', porTurno.manha)}
               </div>
-            );
-          })}
+            )}
+            {porTurno.tarde && (
+              <div style={{ flex: '0 0 auto', maxWidth: '500px' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>{TURNO_LABEL.tarde}</h3>
+                {renderizarGradeTurno('tarde', porTurno.tarde)}
+              </div>
+            )}
+            <div style={{ flex: '0 0 auto', maxWidth: '500px' }}>
+              <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>GRADE CURRICULAR</h3>
+              <MatrizCurricular escolaId={escolaId} anosEscolares={anosManhaTarde} somenteLeitura={somenteLeitura} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {porTurno.noite && (
+        <div style={{ marginBottom: '20px' }}>
+          <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>{TURNO_LABEL.noite}</h3>
+          <div style={{ flex: '0 0 auto', maxWidth: '500px' }}>
+            {renderizarGradeTurno('noite', porTurno.noite)}
+          </div>
         </div>
       )}
 
