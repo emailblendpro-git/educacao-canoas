@@ -212,6 +212,7 @@ function inferLotacao(lotacaoRaw) {
   const tipoVinculo = norm.includes('contrat') ? 'contratado' : 'concursado';
   let tipoLotacao = 'principal';
   let escolaOrigemCch = null;
+  let lotacaoAmbigua = false;
 
   // formato com duas caixas na mesma célula: "( X )LOTAÇÃO (  ) CCH - EMEF: X"
   // -- precisa achar QUAL caixa tem o X, não só procurar a palavra "cch" no texto
@@ -224,15 +225,24 @@ function inferLotacao(lotacaoRaw) {
       const m = marcado[2].match(/cch[^a-zA-Z0-9]*-?\s*:?\s*(.+)/i);
       escolaOrigemCch = m ? m[1].trim() : null;
     }
+  } else if (grupos.length === 1) {
+    // uma opção só na célula, com caixa: "( x ) CCH - EMEF HILDO MENEGUETTI"
+    if (grupos[0][1].toLowerCase() === 'x' && /cch/i.test(grupos[0][2])) {
+      tipoLotacao = 'cch';
+      const m = grupos[0][2].match(/cch[^a-zA-Z0-9]*-?\s*:?\s*(.+)/i);
+      escolaOrigemCch = m ? m[1].trim() : null;
+    }
   } else if (norm.includes('cch')) {
-    // formato antigo, uma opção só na célula: "( x ) CCH - EMEF HILDO MENEGUETTI"
-    tipoLotacao = 'cch';
-    const m = lotacaoRaw.match(/cch[^a-zA-Z0-9]*-?\s*:?\s*(.+)/i);
-    escolaOrigemCch = m ? m[1].trim() : null;
+    // nenhuma caixa "(x)"/"(  )" foi encontrada no texto -- normalmente porque a
+    // escola usa uma caixa de seleção gráfica (form control) em vez de digitar
+    // o "x", e o Excel não expõe esse estado marcado/desmarcado como texto da
+    // célula. Sem isso não dá pra saber se é CCH ou lotação principal -- não
+    // assume nenhum dos dois, fica como principal e sinaliza pra conferência humana.
+    lotacaoAmbigua = true;
   }
 
   const reducaoDeCarga = /redu[cç][aã]o/.test(norm);
-  return { tipoVinculo, tipoLotacao, escolaOrigemCch, reducaoDeCarga };
+  return { tipoVinculo, tipoLotacao, escolaOrigemCch, reducaoDeCarga, lotacaoAmbigua };
 }
 
 function parseRH(ws) {
@@ -290,7 +300,7 @@ function parseRH(ws) {
       return;
     }
 
-    const { tipoVinculo, tipoLotacao, escolaOrigemCch, reducaoDeCarga } = inferLotacao(lotacaoRaw);
+    const { tipoVinculo, tipoLotacao, escolaOrigemCch, reducaoDeCarga, lotacaoAmbigua } = inferLotacao(lotacaoRaw);
 
     roster.push({
       nome, matricula, area, ch: ch.valor, chDesdobro: ch.desdobro,
@@ -303,6 +313,11 @@ function parseRH(ws) {
       pendencias.push({
         tipo: 'cch_escola_origem_nao_cadastrada', nome, matricula,
         motivo: `Lotação principal em "${escolaOrigemCch || '?'}" — carga total só pode ser validada quando essa escola for cadastrada no banco`,
+      });
+    } else if (lotacaoAmbigua) {
+      pendencias.push({
+        tipo: 'lotacao_nao_confirmada', nome, matricula,
+        motivo: `Não deu pra confirmar pelo texto da planilha se a lotação é principal ou CCH (célula: "${lotacaoRaw.trim()}"). Provavelmente a escola usa caixa de seleção gráfica em vez de digitar o "x" — foi importado como lotação principal.`,
       });
     }
   });
@@ -482,8 +497,12 @@ function parseGrade(ws) {
       return;
     }
 
-    // linha de dados: código de turma tipo "1A", "6C"
-    const m = a1.match(/^(\d+)([A-Za-z]+)$/);
+    // linha de dados: código de turma tipo "1A", "6C" -- algumas escolas
+    // escrevem com o símbolo de grau e espaços ("3º A", "6ºA", " 9º B"), então
+    // normaliza removendo º e espaços internos antes de casar o padrão (sem
+    // isso a turma inteira era descartada em silêncio, nem virava pendência).
+    const a1Normalizado = a1.replace(/º/g, '').replace(/\s+/g, '');
+    const m = a1Normalizado.match(/^(\d+)([A-Za-z]+)$/);
     if (m) {
       const papeis = {};
       for (const { col, sigla } of colunas) {
@@ -537,6 +556,12 @@ const DEVOLUTIVA_RENDER = {
     onde: `${p.nome} (matrícula ${p.matricula})`,
     problema: p.motivo,
     oQueFazer: 'Nenhuma ação da escola por enquanto — depende de cadastrarmos a escola de origem no sistema.',
+  }),
+  lotacao_nao_confirmada: (p) => ({
+    categoria: 'Cadastro de professor',
+    onde: `${p.nome} (matrícula ${p.matricula})`,
+    problema: p.motivo,
+    oQueFazer: 'Confirmar se essa pessoa é lotação principal desta escola ou CCH de outra escola.',
   }),
   cargo_nome_nao_identificado: (p) => ({
     categoria: 'Cargo/função',
@@ -694,6 +719,7 @@ function chaveNatural(p) {
     case 'professor_sem_matricula_valida':
       return normalize(p.nome);
     case 'cch_escola_origem_nao_cadastrada':
+    case 'lotacao_nao_confirmada':
       return p.matricula;
     case 'aba_ambigua':
       return p.papel;

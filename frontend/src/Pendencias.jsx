@@ -41,6 +41,11 @@ const RENDER = {
     onde: `${d.nome} (matrícula ${d.matricula})`,
     problema: d.motivo,
   }),
+  lotacao_nao_confirmada: (d) => ({
+    categoria: 'Cadastro de professor',
+    onde: `${d.nome} (matrícula ${d.matricula})`,
+    problema: d.motivo,
+  }),
   aba_ambigua: (d) => ({
     categoria: 'Estrutura da planilha',
     onde: `Aba: ${d.papel}`,
